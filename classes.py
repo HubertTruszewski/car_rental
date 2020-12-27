@@ -1,3 +1,38 @@
+from typing import Type
+
+
+class WrongSeatsValue(ValueError):
+    pass
+
+
+class WrongSeatsType(Type):
+    pass
+
+
+class NegativeFuelConsumptionError(ValueError):
+    pass
+
+
+class WrongDoorsValue(ValueError):
+    pass
+
+
+class NegativePriceError(ValueError):
+    pass
+
+
+class WrongPriceType(TypeError):
+    pass
+
+
+class NegativeCapacityError(ValueError):
+    pass
+
+
+class WrongCapacityType(TypeError):
+    pass
+
+
 class Car:
     def __init__(self, mark, model, registration_number,
                  seats, fuel_consumption, doors, color, price, db_id=None):
