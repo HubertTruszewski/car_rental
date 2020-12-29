@@ -5,7 +5,7 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
                     WrongDoorsTypeError, NegativeDoorsError,
-                    WrongPriceType, NegativePriceError,
+                    WrongPriceTypeError, NegativePriceError,
                     WrongSideDoorTypeError, WrongSideDoorValueError)
 from pytest import raises
 
@@ -146,7 +146,7 @@ def test_car_set_price_str():
 
 def test_car_set_price_not_number():
     auto = Car()
-    with raises(WrongPriceType):
+    with raises(WrongPriceTypeError):
         auto.set_price('abc')
 
 
