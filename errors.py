@@ -44,3 +44,11 @@ class NegativeCapacityError(ValueError):
 
 class WrongCapacityTypeError(TypeError):
     pass
+
+
+class WrongSideDoorTypeError(TypeError):
+    pass
+
+
+class WrongSideDoorValueError(ValueError):
+    pass

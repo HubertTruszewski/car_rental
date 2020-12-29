@@ -5,7 +5,8 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
                     WrongDoorsTypeError, NegativeDoorsError,
-                    WrongPriceType, NegativePriceError)
+                    WrongPriceType, NegativePriceError,
+                    WrongSideDoorTypeError, WrongSideDoorValueError)
 
 
 class Car:
@@ -225,6 +226,12 @@ class Van(Car):
         self._capacity = capacity
 
     def set_side_door(self, side_door):
+        try:
+            side_door = int(side_door)
+        except Exception:
+            raise WrongSideDoorTypeError(side_door)
+        if side_door not in {0, 1}:
+            raise WrongSideDoorValueError(side_door)
         self._side_door = bool(side_door)
 
     def add_to_database(self):

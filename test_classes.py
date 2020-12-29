@@ -5,7 +5,8 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
                     WrongDoorsTypeError, NegativeDoorsError,
-                    WrongPriceType, NegativePriceError)
+                    WrongPriceType, NegativePriceError,
+                    WrongSideDoorTypeError, WrongSideDoorValueError)
 from pytest import raises
 
 
@@ -177,3 +178,39 @@ def test_van_set_capacity_negative():
     auto = Van()
     with raises(NegativeCapacityError):
         auto.set_capacity('-123')
+
+
+def test_van_set_side_door():
+    auto = Van()
+    auto.set_side_door(0)
+    assert auto.side_door() is False
+
+
+def test_van_set_side_door_true():
+    auto = Van()
+    auto.set_side_door(1)
+    assert auto.side_door() is True
+
+
+def test_van_set_side_door_str_false():
+    auto = Van()
+    auto.set_side_door('0')
+    assert auto.side_door() is False
+
+
+def test_van_set_side_door_str_true():
+    auto = Van()
+    auto.set_side_door(1)
+    assert auto.side_door() is True
+
+
+def test_van_set_side_door_str():
+    auto = Van()
+    with raises(WrongSideDoorTypeError):
+        auto.set_side_door('a')
+
+
+def test_van_set_side_door_out_of_range():
+    auto = Van()
+    with raises(WrongSideDoorValueError):
+        auto.set_side_door('3')
