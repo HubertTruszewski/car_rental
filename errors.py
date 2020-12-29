@@ -34,7 +34,7 @@ class NegativePriceError(ValueError):
     pass
 
 
-class WrongPriceType(TypeError):
+class WrongPriceTypeError(TypeError):
     pass
 
 

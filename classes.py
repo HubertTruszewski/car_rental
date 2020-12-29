@@ -5,7 +5,7 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
                     WrongDoorsTypeError, NegativeDoorsError,
-                    WrongPriceType, NegativePriceError,
+                    WrongPriceTypeError, NegativePriceError,
                     WrongSideDoorTypeError, WrongSideDoorValueError)
 
 
@@ -143,13 +143,64 @@ class Car:
         try:
             price = float(price)
         except Exception:
-            raise WrongPriceType(price)
+            raise WrongPriceTypeError(price)
         if price < 0:
             raise NegativePriceError(price)
         self._price = price
 
-    def insert_values():
-        pass
+    def insert_values(self):
+        mark = input('Marka: ')
+        self.set_mark(mark)
+        model = input('Model: ')
+        self.set_model(model)
+        registration_number = input('Numer rejestracyjny: ')
+        self.set_registration_number(registration_number)
+        correct_value = False
+        while not correct_value:
+            seats = input('Liczba miejsc: ')
+            try:
+                self.set_seats(seats)
+                correct_value = True
+            except WrongSeatsTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeSeatsError:
+                print('Liczba miejsc nie może być ujemna, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            fuel_consumption = input('Zużycie paliwa: ')
+            try:
+                self.set_fuel_consumption(fuel_consumption)
+                correct_value = True
+            except WrongFuelConsumptionTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeFuelConsumptionError:
+                print('Zużycie paliwa nie może być ujemne, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            doors = input('Liczba miejsc: ')
+            try:
+                self.set_doors(doors)
+                correct_value = True
+            except WrongDoorsTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeDoorsError:
+                print('Liczba drzwi nie może być ujemna')
+
+        color = input('Kolor: ')
+        self.set_color(color)
+
+        correct_value = False
+        while not correct_value:
+            price = input('Cena: ')
+            try:
+                self.set_price(price)
+                correct_value = True
+            except WrongPriceTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativePriceError:
+                print('Cena nie może byc ujemna, spróbuj ponownie')
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '
@@ -184,6 +235,13 @@ class PassengerCar(Car):
 
     def set_classification(self, classification):
         self._classification = classification
+
+    def insert_values(self):
+        super().insert_values()
+        body = input('Nadwozie: ')
+        self.set_body(body)
+        classification = input('Klasa: ')
+        self.set_classification(classification)
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '
@@ -233,6 +291,31 @@ class Van(Car):
         if side_door not in {0, 1}:
             raise WrongSideDoorValueError(side_door)
         self._side_door = bool(side_door)
+
+    def insert_values(self):
+        super().insert_values()
+        correct_value = False
+        while not correct_value:
+            capacity = input('Pojemność: ')
+            try:
+                self.set_capacity(capacity)
+                correct_value = True
+            except WrongCapacityTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeCapacityError:
+                print('Pojemność nie może być ujemna, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            side_door = input('Czy posiada boczne drzwi? 0=Nie, 1=Tak: ')
+            try:
+                self.set_side_door(side_door)
+                correct_value = True
+            except WrongSideDoorTypeError:
+                print('Wprowadzona wartość musi być liczbą 0 lub 1,'
+                      ' spróbuj ponownie')
+            except WrongSideDoorValueError:
+                print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '
