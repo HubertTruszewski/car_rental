@@ -34,8 +34,9 @@ class WrongCapacityType(TypeError):
 
 
 class Car:
-    def __init__(self, mark, model, registration_number,
-                 seats, fuel_consumption, doors, color, price, db_id=None):
+    def __init__(self, mark=None, model=None, registration_number=None,
+                 seats=None, fuel_consumption=None, doors=None,
+                 color=None, price=None, db_id=None):
         self._db_id = db_id
         self._mark = mark
         self._model = model
@@ -74,8 +75,35 @@ class Car:
     def type_id(self):
         return self._type_id
 
+    def set_db_id(self, db_id):
+        self._db_id = db_id
+
+    def set_mark(self, mark):
+        self._mark = mark
+
+    def set_model(self, model):
+        self._model = model
+
+    def set_registration_number(self, registration_number):
+        self._registration_number = registration_number
+
+    def set_seats(self, seats):
+        self._seats = seats
+
+    def set_fuel_consumption(self, fuel_consumption):
+        self._fuel_consumption = fuel_consumption
+
+    def set_doors(self, doors):
+        self._doors = doors
+
+    def set_color(self, color):
+        self._color = color
+
+    def set_price(self, price):
+        self._price = price
+
     def add_to_database(self):
-        query = 'INSERT INTO cars (mark, model, registration_number, seats '
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
         query += 'fuel_consumption, doors, color, price, type_id) VALUES '
         query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {})'
         query = query.format(self._mark, self._model,
@@ -87,9 +115,9 @@ class Car:
 
 
 class PassengerCar(Car):
-    def __init__(self, mark, model, registration_number, seats,
-                 fuel_consumption, doors, color, price,
-                 body, classification, db_id=None):
+    def __init__(self, mark=None, model=None, registration_number=None,
+                 seats=None, fuel_consumption=None, doors=None, color=None,
+                 price=None, body=None, classification=None, db_id=None):
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
         self._body = body
@@ -101,6 +129,12 @@ class PassengerCar(Car):
 
     def classification(self):
         return self._classification
+
+    def set_body(self, body):
+        self._body = body
+
+    def set_classification(self, classification):
+        self._classification = classification
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '
@@ -117,9 +151,10 @@ class PassengerCar(Car):
 
 
 class Van(Car):
-    def __init__(self, mark, model, registration_number, seats,
-                 fuel_consumption, doors, color, price, capacity,
-                 side_door, db_id=None):
+    def __init__(self, mark=None, model=None, registration_number=None,
+                 seats=None, fuel_consumption=None, doors=None,
+                 color=None, price=None, capacity=None,
+                 side_door=None, db_id=None):
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
         self._capacity = capacity
@@ -131,6 +166,12 @@ class Van(Car):
 
     def side_door(self):
         return self._side_door
+
+    def set_capacity(self, capacity):
+        self._capacity = capacity
+
+    def set_side_door(self, side_door):
+        self._side_door = bool(side_door)
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '
