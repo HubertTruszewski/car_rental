@@ -1,51 +1,61 @@
 from modelio import insert_to_database
-
-
-class NegativeSeatsError(ValueError):
-    pass
-
-
-class WrongSeatsType(TypeError):
-    pass
-
-
-class NegativeFuelConsumptionError(ValueError):
-    pass
-
-
-class NegativeDoorsError(ValueError):
-    pass
-
-
-class NegativePriceError(ValueError):
-    pass
-
-
-class WrongPriceType(TypeError):
-    pass
-
-
-class NegativeCapacityError(ValueError):
-    pass
-
-
-class WrongCapacityType(TypeError):
-    pass
+from errors import (NegativeFuelConsumptionError, NegativeSeatsError,
+                    WrongDbIdTypeError, NegativeDbIdError,
+                    WrongSeatsTypeError,
+                    WrongFuelConsumptionTypeError,
+                    WrongDoorsTypeError, NegativeDoorsError,
+                    WrongPriceType, NegativePriceError)
 
 
 class Car:
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None,
                  color=None, price=None, db_id=None):
-        self._db_id = db_id
-        self._mark = mark
-        self._model = model
-        self._registration_number = registration_number
-        self._seats = seats
-        self._fuel_consumption = fuel_consumption
-        self._doors = doors
-        self._color = color
-        self._price = price
+
+        if mark:
+            self.set_mark(mark)
+        else:
+            self._mark = None
+
+        if model:
+            self.set_model(model)
+        else:
+            self._model = None
+
+        if registration_number:
+            self.set_registration_number(registration_number)
+        else:
+            self._registration_number = None
+
+        if seats:
+            self.set_seats(seats)
+        else:
+            self._seats = None
+
+        if fuel_consumption:
+            self.set_fuel_consumption(fuel_consumption)
+        else:
+            self._fuel_consumption = None
+
+        if doors:
+            self.set_doors(doors)
+        else:
+            self._doors = None
+
+        if color:
+            self.set_color(color)
+        else:
+            self._color = None
+
+        if price:
+            self.set_price(price)
+        else:
+            self._price = None
+
+        if db_id:
+            self.set_db_id(db_id)
+        else:
+            self._db_id = None
         self._type_id = 0
 
     def db_id(self):
@@ -59,6 +69,9 @@ class Car:
 
     def registration_number(self):
         return self._registration_number
+
+    def seats(self):
+        return self._seats
 
     def fuel_consumption(self):
         return self._fuel_consumption
@@ -76,6 +89,13 @@ class Car:
         return self._type_id
 
     def set_db_id(self, db_id):
+        try:
+            print(db_id)
+            db_id = int(db_id)
+        except Exception:
+            raise WrongDbIdTypeError(db_id)
+        if db_id < 1:
+            raise NegativeDbIdError(db_id)
         self._db_id = db_id
 
     def set_mark(self, mark):
@@ -88,19 +108,46 @@ class Car:
         self._registration_number = registration_number
 
     def set_seats(self, seats):
+        try:
+            seats = int(seats)
+        except Exception:
+            raise WrongSeatsTypeError(seats)
+        if seats < 0:
+            raise NegativeSeatsError(seats)
         self._seats = seats
 
     def set_fuel_consumption(self, fuel_consumption):
+        try:
+            fuel_consumption = float(fuel_consumption)
+        except Exception:
+            raise WrongFuelConsumptionTypeError(fuel_consumption)
+        if fuel_consumption < 0:
+            raise NegativeFuelConsumptionError(fuel_consumption)
         self._fuel_consumption = fuel_consumption
 
     def set_doors(self, doors):
+        try:
+            doors = int(doors)
+        except Exception:
+            raise WrongDoorsTypeError(doors)
+        if doors < 0:
+            raise NegativeDoorsError(doors)
         self._doors = doors
 
     def set_color(self, color):
         self._color = color
 
     def set_price(self, price):
+        try:
+            price = float(price)
+        except Exception:
+            raise WrongPriceType(price)
+        if price < 0:
+            raise NegativePriceError(price)
         self._price = price
+
+    def insert_values():
+        pass
 
     def add_to_database(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '

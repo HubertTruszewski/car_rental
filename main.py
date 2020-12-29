@@ -1,6 +1,6 @@
 import os
-from classes import (NegativeCapacityError, NegativeDoorsError,
-                     NegativeSeatsError, NegativePriceError,
+from classes import (NegativeCapacityError,
+                     NegativePriceError,
                      NegativeFuelConsumptionError)
 from classes import Car, PassengerCar, Van
 
@@ -34,31 +34,40 @@ def print_main_menu():
 
 
 def add_car():
+    fuel_consumption = None
+    price = None
+    capacity = None
+    side_door = None
     print('Jaki rodzaj samochodu dodać?\n1. Samochód osobowy\n2. Samochód dostawczy\
           \n3. Inny')
     answer = 0
     while not answer:
-        try:
-            answer = int(input('Wybór: '))
-        except Exception:
-            print('Podana wartość musi być liczbą, spróbuj ponownie')
+        answer = input("Wybór: ")
+        if answer.isdigit():
+            answer = int(answer)
+            if answer not in {1, 2, 3}:
+                print('Możliwe opcje to 1, 2, 3; spróbuj jeszcze raz')
+                answer = 0
+                continue
+        else:
+            print('Niepoprawna wartość, spróbuj jeszcze raz')
             answer = 0
             continue
         mark = input('Marka pojazdu: ')
         model = input('Model pojazdu: ')
         registration_number = input('Numer rejestracyjny: ')
         seats = 0
+
         while not seats:
-            try:
-                seats = int(input('Liczba miejsc: '))
-                if seats < 1:
-                    raise NegativeSeatsError(seats)
-            except NegativeSeatsError:
-                print('Liczba miejsc nie może być ujemna, spróbuj jeszcze raz')
+            seats = input("Liczba miejsc: ")
+            if seats.isdigit():
+                seats = int(seats)
+                if seats == 0:
+                    print('Niepoprawna wartość, spróbuj jeszcze raz')
+            else:
+                print("Niepoprawna wartość, spróbuj ponownie")
                 seats = 0
-            except Exception:
-                print('Niepoprawna wartość, spróbuj jeszcze raz')
-                seats = 0
+
         correct_fuel_consumption = False
         while not correct_fuel_consumption:
             try:
@@ -70,20 +79,18 @@ def add_car():
                 print('Spalanie nie może być ujemne, spróbuj jeszcze raz')
                 continue
             except Exception:
-                print('Nie poprawna wartość, spróbuj jeszcze raz')
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
                 continue
 
         doors = 0
         while not doors:
-            try:
-                doors = int(input('Liczba drzwi: '))
-                if doors < 1:
-                    raise NegativeDoorsError(doors)
-            except NegativeDoorsError:
-                print('Liczba drzwi nie może być ujemna, spróbuj jeszcze raz')
-                doors = 0
-            except Exception:
-                print('Niepoprawna wartość, spróbuj jeszcze raz')
+            doors = input("Liczba drzwi: ")
+            if doors.isdigit():
+                doors = int(doors)
+                if doors == 0:
+                    print('Niepoprawna wartość, spróbuj jeszcze raz')
+            else:
+                print("Niepoprawna wartość, spróbuj jeszcze raz")
                 doors = 0
 
         color = input('Kolor: ')
