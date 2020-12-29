@@ -214,3 +214,19 @@ def test_van_set_side_door_out_of_range():
     auto = Van()
     with raises(WrongSideDoorValueError):
         auto.set_side_door('3')
+
+
+def test_car_generate_insert_query():
+    auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200.87)
+    result = auto.generate_insert_query()
+    query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+            'fuel_consumption, doors, color, price, type_id) VALUES '\
+            '("Skoda", "Octavia", "WZ3265E", 5, 7.8, 5, "czerwony", 200.87, 0)'
+    assert result == query
+
+
+def test_car_generate_delete_query():
+    auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200, 12)
+    result = auto.generate_delete_query()
+    query = 'DELETE FROM cars WHERE db_id=12'
+    assert result == query

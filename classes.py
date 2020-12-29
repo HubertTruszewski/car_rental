@@ -1,3 +1,4 @@
+from terminaltables import AsciiTable
 from modelio import insert_to_database
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
@@ -202,16 +203,61 @@ class Car:
             except NegativePriceError:
                 print('Cena nie może byc ujemna, spróbuj ponownie')
 
-    def add_to_database(self):
-        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
-        query += 'fuel_consumption, doors, color, price, type_id) VALUES '
-        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {})'
+    def rows_to_table(self):
+        rows = [
+                    ['Marka', self._mark],
+                    ['Model', self._model],
+                    ['Numer rejestracyjny', self._registration_number],
+                    ['Miejsca', self._seats],
+                    ['Zużycie paliwa', self._fuel_consumption],
+                    ['Drzwi', self._doors],
+                    ['Kolor', self._color],
+                    ['Cena', self._price]
+                ]
+        return rows
+
+    def print_as_table(self):
+
+        rows = self.rows_to_table()
+        table = AsciiTable(rows, title='Dane pojazdu')
+        table.inner_heading_row_border = False
+        table.inner_row_border = True and 0
+        print(table.table)
+
+    def generate_insert_query(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+                'fuel_consumption, doors, color, price, type_id) VALUES '\
+                '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {})'
         query = query.format(self._mark, self._model,
                              self._registration_number, self._seats,
                              self._fuel_consumption, self._doors,
                              self._color, self._price, self._type_id)
-        print(query)
-        insert_to_database(query)
+        return query
+
+    def generate_delete_query(self):
+        return f'DELETE FROM cars WHERE db_id={self._db_id}'
+
+    def add_to_database(self):
+        self.insert_values()
+        self.print_as_table()
+        correct_value = False
+        while not correct_value:
+            answer = input('\nCzy dodać pojazd do bazy? 0=Nie, 1=Tak: ')
+            if answer.isdigit():
+                answer = int(answer)
+                if answer in {0, 1}:
+                    if answer == 0:
+                        print('Anulowano dodanie do bazy\nNaciśnij enter')
+                        input()
+                        return
+                    else:
+                        query = self.generate_insert_query()
+                        insert_to_database(query)
+                        correct_value = True
+                else:
+                    print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
+            else:
+                print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
 
 
 class PassengerCar(Car):
@@ -329,3 +375,7 @@ class Van(Car):
                              int(self._side_door), self._type_id)
         print(query)
         insert_to_database(query)
+
+
+auto = Car('Skoda', 'Superb', 'WOT14007', 5, 7.5, 5, 'czarny', 200)
+auto.print_as_table()
