@@ -1,5 +1,6 @@
 from modelio import insert_to_database
-from errors import (NegativeFuelConsumptionError, NegativeSeatsError,
+from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
+                    NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
@@ -215,6 +216,12 @@ class Van(Car):
         return self._side_door
 
     def set_capacity(self, capacity):
+        try:
+            capacity = float(capacity)
+        except Exception:
+            raise WrongCapacityTypeError(capacity)
+        if capacity < 0:
+            raise NegativeCapacityError(capacity)
         self._capacity = capacity
 
     def set_side_door(self, side_door):

@@ -42,5 +42,5 @@ class NegativeCapacityError(ValueError):
     pass
 
 
-class WrongCapacityType(TypeError):
+class WrongCapacityTypeError(TypeError):
     pass

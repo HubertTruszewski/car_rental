@@ -1,5 +1,6 @@
-from classes import Car
-from errors import (NegativeFuelConsumptionError, NegativeSeatsError,
+from classes import Car, Van
+from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
+                    NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
@@ -152,3 +153,27 @@ def test_car_set_price_negative():
     auto = Car()
     with raises(NegativePriceError):
         auto.set_price('-150.98')
+
+
+def test_van_set_capacity():
+    auto = Van()
+    auto.set_capacity(600)
+    assert auto.capacity() == 600
+
+
+def test_van_set_capacity_str():
+    auto = Van()
+    auto.set_capacity('600.9')
+    assert auto.capacity() == 600.9
+
+
+def test_van_set_capacity_not_number():
+    auto = Van()
+    with raises(WrongCapacityTypeError):
+        auto.set_capacity('abc')
+
+
+def test_van_set_capacity_negative():
+    auto = Van()
+    with raises(NegativeCapacityError):
+        auto.set_capacity('-123')
