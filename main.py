@@ -1,4 +1,8 @@
 import os
+from classes import (NegativeCapacityError, NegativeDoorsError,
+                     NegativeSeatsError, NegativePriceError,
+                     NegativeFuelConsumptionError)
+from classes import Car, PassengerCar, Van
 
 
 def clear_terminal():
@@ -30,14 +34,120 @@ def print_main_menu():
 
 
 def add_car():
-    pass
+    print('Jaki rodzaj samochodu dodać?\n1. Samochód osobowy\n2. Samochód dostawczy\
+          \n3. Inny')
+    answer = 0
+    while not answer:
+        try:
+            answer = int(input('Wybór: '))
+        except Exception:
+            print('Podana wartość musi być liczbą, spróbuj ponownie')
+            answer = 0
+            continue
+        mark = input('Marka pojazdu: ')
+        model = input('Model pojazdu: ')
+        registration_number = input('Numer rejestracyjny: ')
+        seats = 0
+        while not seats:
+            try:
+                seats = int(input('Liczba miejsc: '))
+                if seats < 1:
+                    raise NegativeSeatsError(seats)
+            except NegativeSeatsError:
+                print('Liczba miejsc nie może być ujemna, spróbuj jeszcze raz')
+                seats = 0
+            except Exception:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+                seats = 0
+        correct_fuel_consumption = False
+        while not correct_fuel_consumption:
+            try:
+                fuel_consumption = float(input('Spalanie: '))
+                if fuel_consumption < 0:
+                    raise NegativeFuelConsumptionError(fuel_consumption)
+                correct_fuel_consumption = True
+            except NegativeFuelConsumptionError:
+                print('Spalanie nie może być ujemne, spróbuj jeszcze raz')
+                continue
+            except Exception:
+                print('Nie poprawna wartość, spróbuj jeszcze raz')
+                continue
+
+        doors = 0
+        while not doors:
+            try:
+                doors = int(input('Liczba drzwi: '))
+                if doors < 1:
+                    raise NegativeDoorsError(doors)
+            except NegativeDoorsError:
+                print('Liczba drzwi nie może być ujemna, spróbuj jeszcze raz')
+                doors = 0
+            except Exception:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+                doors = 0
+
+        color = input('Kolor: ')
+        correct_price = False
+        while not correct_price:
+            try:
+                price = float(input('Cena: '))
+                if price < 0:
+                    raise NegativePriceError(price)
+                correct_price = True
+            except NegativePriceError:
+                print('Cena nie może być ujemna, spróbuj jeszcze raz!')
+            except Exception:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+        if answer == 1:
+            body = input('Nadwozie: ')
+            classification = input('Klasa: ')
+            auto = PassengerCar(mark, model, registration_number, seats,
+                                fuel_consumption, doors, color, price,
+                                body, classification)
+            auto.add_to_database()
+        if answer == 2:
+            correct_capacity = False
+            while not correct_capacity:
+                try:
+                    capacity = float(input('Pojemność: '))
+                    if capacity < 0:
+                        raise NegativeCapacityError(capacity)
+                    correct_capacity = True
+                except NegativeCapacityError:
+                    print('Pojemność nie może być ujemna, spróbuj jeszcze raz')
+                except Exception:
+                    print('Niepoprawna wartość, spróbuj jeszcze raz')
+            correct_side_door = False
+            while not correct_side_door:
+                side_door = input('Czy posiada boczne drzwi? 1=Tak, 0=Nie: ')
+                if side_door.isdecimal():
+                    side_door = int(side_door)
+                    if side_door != 0 and side_door != 1:
+                        print('Poprawne dane to 0 lub 1, spróbuj jeszcze raz')
+                    else:
+                        correct_side_door = True
+                else:
+                    print('Niepoprawna wartość, spróbuj jeszcze raz')
+            auto = Van(mark, model, registration_number, seats,
+                       fuel_consumption, doors, color, price,
+                       capacity, side_door)
+            auto.add_to_database()
+        if answer == 3:
+            auto = Car(mark, model, registration_number, seats,
+                       fuel_consumption, doors, color, price)
+            auto.add_to_database()
 
 
 def manipulate_car():
     pass
 
 
+def search_car(parameters):
+    pass
+
+
 def auto_menu():
+    clear_terminal()
     print("MENU - AUTA")
     print("Proszę wybrać jedną z dostępnych opcji:")
     print("1. Dodanie nowego samochodu")
@@ -47,19 +157,21 @@ def auto_menu():
     answer = 0
 
     while not answer:
-        answer = int(input("Wybór: "))
-    if answer == 1:
-        clear_terminal()
-        add_car()
-    elif answer == 2:
-        clear_terminal()
-        manipulate_car()
-    elif answer == 9:
-        clear_terminal()
-        main()
-    else:
-        print("Niepoprawny wybór, spróbuj jeszcze raz:")
-        answer = 0
+        try:
+            answer = int(input("Wybór: "))
+        except Exception:
+            print('Podana wartość musi być liczbą, spróbuj jeszcze raz')
+            answer = 0
+            continue
+        if answer == 1:
+            add_car()
+        elif answer == 2:
+            manipulate_car()
+        elif answer == 9:
+            return
+        else:
+            print("Niepoprawny wybór, spróbuj jeszcze raz:")
+            answer = 0
 
 
 def reservation_menu():
@@ -70,30 +182,35 @@ def rental_menu():
     pass
 
 
-def main():
-    print_logo()
-    print_line(40)
-    print_main_menu()
+def main_menu():
 
     answer = 0
 
     while not answer:
-        answer = int(input("Wybór: "))
+        clear_terminal()
+        print_logo()
+        print_line(40)
+        print_main_menu()
+
+        try:
+            answer = int(input("Wybór: "))
+        except Exception:
+            print('Niepoprawna wartość, spróbuj jeszcze raz')
+            continue
         if answer == 1:
-            clear_terminal()
             auto_menu()
         elif answer == 2:
-            clear_terminal()
             reservation_menu()
         elif answer == 3:
-            clear_terminal()
             rental_menu()
         elif answer == 0:
             break
         else:
             print("Niepoprawny wybór, spróbuj jeszcze raz:")
             answer = 0
+        answer = 0
+        continue
 
 
 if __name__ == "__main__":
-    main()
+    main_menu()

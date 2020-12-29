@@ -1,11 +1,11 @@
-from typing import Type
+from modelio import insert_to_database
 
 
-class WrongSeatsValue(ValueError):
+class NegativeSeatsError(ValueError):
     pass
 
 
-class WrongSeatsType(Type):
+class WrongSeatsType(TypeError):
     pass
 
 
@@ -13,7 +13,7 @@ class NegativeFuelConsumptionError(ValueError):
     pass
 
 
-class WrongDoorsValue(ValueError):
+class NegativeDoorsError(ValueError):
     pass
 
 
@@ -74,16 +74,26 @@ class Car:
     def type_id(self):
         return self._type_id
 
+    def add_to_database(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats '
+        query += 'fuel_consumption, doors, color, price, type_id) VALUES '
+        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {})'
+        query = query.format(self._mark, self._model,
+                             self._registration_number, self._seats,
+                             self._fuel_consumption, self._doors,
+                             self._color, self._price, self._type_id)
+        print(query)
+        insert_to_database(query)
+
 
 class PassengerCar(Car):
     def __init__(self, mark, model, registration_number, seats,
                  fuel_consumption, doors, color, price,
-                 body, classification, isofix, db_id=None):
+                 body, classification, db_id=None):
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
         self._body = body
         self._classification = classification
-        self._isofix = bool(isofix)
         self._type_id = 1
 
     def body(self):
@@ -92,8 +102,18 @@ class PassengerCar(Car):
     def classification(self):
         return self._classification
 
-    def isofix(self):
-        return self._isofix
+    def add_to_database(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
+        query += 'fuel_consumption, doors, color, price, '
+        query += 'body, classification, type_id) VALUES '
+        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, "{}", "{}", {})'
+        query = query.format(self._mark, self._model,
+                             self._registration_number, self._seats,
+                             self._fuel_consumption, self._doors,
+                             self._color, self._price, self._body,
+                             self._classification, self._type_id)
+        print(query)
+        insert_to_database(query)
 
 
 class Van(Car):
@@ -111,3 +131,16 @@ class Van(Car):
 
     def side_door(self):
         return self._side_door
+
+    def add_to_database(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
+        query += 'fuel_consumption, doors, color, price, '
+        query += 'capacity, side_door, type_id) VALUES '
+        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, "{}", "{}", {})'
+        query = query.format(self._mark, self._model,
+                             self._registration_number, self._seats,
+                             self._fuel_consumption, self._doors,
+                             self._color, self._price, self._capacity,
+                             int(self._side_door), self._type_id)
+        print(query)
+        insert_to_database(query)
