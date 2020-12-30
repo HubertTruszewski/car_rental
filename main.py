@@ -42,11 +42,12 @@ def add_car():
             if answer in {1, 2, 3}:
                 if answer == 1:
                     auto = PassengerCar()
-                if answer == 2:
+                elif answer == 2:
                     auto = Van()
-                if answer == 3:
+                else:
                     auto = Car()
-                    auto.add_to_database()
+                auto.add_to_database()
+                return
             else:
                 print('Niepoprawna wartość, spróbuj jeszcze raz')
         else:
@@ -80,6 +81,7 @@ def auto_menu():
             continue
         if answer == 1:
             add_car()
+            return
         elif answer == 2:
             manipulate_car()
         elif answer == 9:

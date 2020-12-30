@@ -151,10 +151,13 @@ class Car:
 
     def insert_values(self):
         mark = input('Marka: ')
+        mark = mark.title()
         self.set_mark(mark)
         model = input('Model: ')
+        model = model.title()
         self.set_model(model)
         registration_number = input('Numer rejestracyjny: ')
+        registration_number = registration_number.upper()
         self.set_registration_number(registration_number)
         correct_value = False
         while not correct_value:
@@ -190,6 +193,7 @@ class Car:
                 print('Liczba drzwi nie może być ujemna')
 
         color = input('Kolor: ')
+        color = color.lower()
         self.set_color(color)
 
         correct_value = False
@@ -221,7 +225,7 @@ class Car:
         rows = self.rows_to_table()
         table = AsciiTable(rows, title='Dane pojazdu')
         table.inner_heading_row_border = False
-        table.inner_row_border = True and 0
+        table.inner_row_border = False
         print(table.table)
 
     def generate_insert_query(self):
@@ -254,6 +258,8 @@ class Car:
                         query = self.generate_insert_query()
                         insert_to_database(query)
                         correct_value = True
+                        print('Dodano samochód do bazy\nNaciśnij enter')
+                        input()
                 else:
                     print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
             else:
@@ -375,7 +381,3 @@ class Van(Car):
                              int(self._side_door), self._type_id)
         print(query)
         insert_to_database(query)
-
-
-auto = Car('Skoda', 'Superb', 'WOT14007', 5, 7.5, 5, 'czarny', 200)
-auto.print_as_table()

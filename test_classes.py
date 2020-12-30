@@ -216,6 +216,22 @@ def test_van_set_side_door_out_of_range():
         auto.set_side_door('3')
 
 
+def test_car_rows_to_table():
+    auto = Car('Ford', 'Mondeo', 'WS2387H', 5, 9.5, 5, 'srebrny', 230)
+    result = auto.rows_to_table()
+    rows = [
+        ['Marka', 'Ford'],
+        ['Model', 'Mondeo'],
+        ['Numer rejestracyjny', 'WS2387H'],
+        ['Miejsca', 5],
+        ['Zużycie paliwa', 9.5],
+        ['Drzwi', 5],
+        ['Kolor', 'srebrny'],
+        ['Cena', 230]
+    ]
+    assert rows == result
+
+
 def test_car_generate_insert_query():
     auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200.87)
     result = auto.generate_insert_query()
