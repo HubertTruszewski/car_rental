@@ -1,4 +1,4 @@
-from classes import Car, Van
+from classes import Car, PassengerCar, Van
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -245,4 +245,82 @@ def test_car_generate_delete_query():
     auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200, 12)
     result = auto.generate_delete_query()
     query = 'DELETE FROM cars WHERE db_id=12'
+    assert result == query
+
+
+def test_passengercar_rows_to_table():
+    auto = PassengerCar('Audi', 'a4', 'GdA45324', 5, 8.7, 3, 'niebieski',
+                        200, 'sedan', 'C+')
+    result = auto.rows_to_table()
+    rows = [
+        ['Marka', 'Audi'],
+        ['Model', 'A4'],
+        ['Numer rejestracyjny', 'GDA45324'],
+        ['Miejsca', 5],
+        ['Zużycie paliwa', 8.7],
+        ['Drzwi', 3],
+        ['Kolor', 'niebieski'],
+        ['Cena', 200],
+        ['Nadwozie', 'sedan'],
+        ['Klasa', 'C+']
+    ]
+    print(result)
+    print(rows)
+    assert rows == result
+
+
+def test_passengercar_generate_insert_query():
+    auto = PassengerCar('Skoda', 'Karoq', 'Wx5386t', 5, 8.7, 5, 'szary',
+                        220, 'SUV', 'd')
+    result = auto.generate_insert_query()
+    query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+            'fuel_consumption, doors, color, price, body, classification, '\
+            'type_id) VALUES ("Skoda", "Karoq", "WX5386T", 5, 8.7, 5, '\
+            '"szary", 220.0, "SUV", "D", 1)'
+    assert result == query
+
+
+def test_passengercar_generate_delete_query():
+    auto = PassengerCar('Skoda', 'Karoq', 'Wx5386t', 5, 8.7, 5, 'szary',
+                        220, 'SUV', 'D', 12)
+    result = auto.generate_delete_query()
+    query = 'DELETE FROM cars WHERE db_id=12'
+    assert query == result
+
+
+def test_van_rows_to_table():
+    auto = Van('Ford', 'Transit', 'WE32654', 3, 10.3, 3, 'żółty',
+               250, 600, 0)
+    result = auto.rows_to_table()
+    rows = [
+        ['Marka', 'Ford'],
+        ['Model', 'Transit'],
+        ['Numer rejestracyjny', 'WE32654'],
+        ['Miejsca', 3],
+        ['Zużycie paliwa', 10.3],
+        ['Drzwi', 3],
+        ['Kolor', 'żółty'],
+        ['Cena', 250],
+        ['Pojemność', 600],
+        ['Boczne drzwi', 'Nie']
+    ]
+    assert result == rows
+
+
+def test_van_generate_insert_query():
+    auto = Van('Ford', 'Transit', 'WE32654', 3, 10.3, 3, 'żółty',
+               250, 600, False)
+    result = auto.generate_insert_query()
+    query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+            'fuel_consumption, doors, color, price, capacity, side_door, '\
+            'type_id) VALUES ("Ford", "Transit", "WE32654", 3, 10.3, 3, '\
+            '"żółty", 250.0, 600, 0, 2)'
+    assert query == result
+
+
+def test_van_generate_delete_query():
+    auto = Van('Ford', 'Transit', 'WE32654', 3, 10.3, 3, 'żółty',
+               250, 600, False, 15)
+    result = auto.generate_delete_query()
+    query = 'DELETE FROM cars WHERE db_id=15'
     assert result == query

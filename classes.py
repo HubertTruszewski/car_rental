@@ -102,12 +102,15 @@ class Car:
         self._db_id = db_id
 
     def set_mark(self, mark):
+        mark = mark.title()
         self._mark = mark
 
     def set_model(self, model):
+        model = model.title()
         self._model = model
 
     def set_registration_number(self, registration_number):
+        registration_number = registration_number.upper()
         self._registration_number = registration_number
 
     def set_seats(self, seats):
@@ -138,6 +141,7 @@ class Car:
         self._doors = doors
 
     def set_color(self, color):
+        color = color.lower()
         self._color = color
 
     def set_price(self, price):
@@ -151,13 +155,10 @@ class Car:
 
     def insert_values(self):
         mark = input('Marka: ')
-        mark = mark.title()
         self.set_mark(mark)
         model = input('Model: ')
-        model = model.title()
         self.set_model(model)
         registration_number = input('Numer rejestracyjny: ')
-        registration_number = registration_number.upper()
         self.set_registration_number(registration_number)
         correct_value = False
         while not correct_value:
@@ -183,7 +184,7 @@ class Car:
 
         correct_value = False
         while not correct_value:
-            doors = input('Liczba miejsc: ')
+            doors = input('Liczba drzwi: ')
             try:
                 self.set_doors(doors)
                 correct_value = True
@@ -193,7 +194,6 @@ class Car:
                 print('Liczba drzwi nie może być ujemna')
 
         color = input('Kolor: ')
-        color = color.lower()
         self.set_color(color)
 
         correct_value = False
@@ -272,8 +272,14 @@ class PassengerCar(Car):
                  price=None, body=None, classification=None, db_id=None):
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
-        self._body = body
-        self._classification = classification
+        if body:
+            self.set_body(body)
+        else:
+            self._body = None
+        if classification:
+            self.set_classification(classification)
+        else:
+            self._classification = None
         self._type_id = 1
 
     def body(self):
@@ -286,27 +292,38 @@ class PassengerCar(Car):
         self._body = body
 
     def set_classification(self, classification):
+        classification = classification.upper()
         self._classification = classification
+
+    def rows_to_table(self):
+        rows = super().rows_to_table()
+        rows += [
+            ['Nadwozie', self._body],
+            ['Klasa', self._classification]
+        ]
+        return rows
 
     def insert_values(self):
         super().insert_values()
         body = input('Nadwozie: ')
+        body = body.lower()
         self.set_body(body)
         classification = input('Klasa: ')
+        classification = classification.upper()
         self.set_classification(classification)
 
-    def add_to_database(self):
-        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
-        query += 'fuel_consumption, doors, color, price, '
-        query += 'body, classification, type_id) VALUES '
-        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, "{}", "{}", {})'
+    def generate_insert_query(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+                'fuel_consumption, doors, color, price, body, '\
+                'classification, type_id) VALUES '\
+                '("{}", "{}", "{}", {}, {}, {}, "{}", {}, "{}", "{}", {})'
+
         query = query.format(self._mark, self._model,
-                             self._registration_number, self._seats,
-                             self._fuel_consumption, self._doors,
+                             self._registration_number,
+                             self._seats, self._fuel_consumption, self._doors,
                              self._color, self._price, self._body,
                              self._classification, self._type_id)
-        print(query)
-        insert_to_database(query)
+        return query
 
 
 class Van(Car):
@@ -344,6 +361,14 @@ class Van(Car):
             raise WrongSideDoorValueError(side_door)
         self._side_door = bool(side_door)
 
+    def rows_to_table(self):
+        rows = super().rows_to_table()
+        rows += [
+            ['Pojemność', self._capacity],
+            ['Boczne drzwi', 'Tak' if self._side_door else 'Nie']
+        ]
+        return rows
+
     def insert_values(self):
         super().insert_values()
         correct_value = False
@@ -369,15 +394,14 @@ class Van(Car):
             except WrongSideDoorValueError:
                 print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
 
-    def add_to_database(self):
-        query = 'INSERT INTO cars (mark, model, registration_number, seats, '
-        query += 'fuel_consumption, doors, color, price, '
-        query += 'capacity, side_door, type_id) VALUES '
-        query += '("{}", "{}", "{}", {}, {}, {}, "{}", {}, "{}", "{}", {})'
+    def generate_insert_query(self):
+        query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
+                'fuel_consumption, doors, color, price, capacity, side_door, '\
+                'type_id) VALUES '\
+                '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {}, {}, {})'
         query = query.format(self._mark, self._model,
                              self._registration_number, self._seats,
                              self._fuel_consumption, self._doors,
                              self._color, self._price, self._capacity,
                              int(self._side_door), self._type_id)
-        print(query)
-        insert_to_database(query)
+        return query
