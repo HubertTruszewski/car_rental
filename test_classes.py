@@ -216,6 +216,14 @@ def test_van_set_side_door_out_of_range():
         auto.set_side_door('3')
 
 
+def test_car_represent_as_row():
+    auto = Car('Skoda', 'Fabia', 'WE3748r', 5, 7.8, 5, 'czarny', 200)
+    result = auto.represent_as_row()
+    row = ['Skoda', 'Fabia', 'WE3748R', 5, 7.8, 5, 'czarny', 200,
+           'n/d', 'n/d', 'n/d', 'n/d', 'Inny']
+    assert result == row
+
+
 def test_car_rows_to_table():
     auto = Car('Ford', 'Mondeo', 'WS2387H', 5, 9.5, 5, 'srebrny', 230)
     result = auto.rows_to_table()
@@ -246,6 +254,15 @@ def test_car_generate_delete_query():
     result = auto.generate_delete_query()
     query = 'DELETE FROM cars WHERE db_id=12'
     assert result == query
+
+
+def test_passengercar_represent_as_row():
+    auto = PassengerCar('Nissan', 'Juke', 'We48482', 5, 9.8, 5, 'czarny',
+                        200, 'hatchback', 'D')
+    result = auto.represent_as_row()
+    row = ['Nissan', 'Juke', 'WE48482', 5, 9.8, 5, 'czarny', 200, 'hatchback',
+           'D', 'n/d', 'n/d', 'Osobowy']
+    assert row == result
 
 
 def test_passengercar_rows_to_table():
@@ -286,6 +303,15 @@ def test_passengercar_generate_delete_query():
     result = auto.generate_delete_query()
     query = 'DELETE FROM cars WHERE db_id=12'
     assert query == result
+
+
+def test_van_represent_as_row():
+    auto = Van('Fiat', 'Doblo', 'dw9373t', 2, 8.7, 3, 'biały',
+               190, 600, True)
+    result = auto.represent_as_row()
+    row = ['Fiat', 'Doblo', 'DW9373T', 2, 8.7, 3, 'biały', 190,
+           'n/d', 'n/d', 600, 'Tak', 'Dostawczy']
+    assert row == result
 
 
 def test_van_rows_to_table():

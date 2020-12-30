@@ -207,6 +207,16 @@ class Car:
             except NegativePriceError:
                 print('Cena nie może byc ujemna, spróbuj ponownie')
 
+    def represent_as_row(self):
+        row = [
+            self._mark, self._model,
+            self._registration_number, self._seats,
+            self._fuel_consumption, self._doors,
+            self._color, self._price, 'n/d',
+            'n/d', 'n/d', 'n/d', 'Inny'
+        ]
+        return row
+
     def rows_to_table(self):
         rows = [
                     ['Marka', self._mark],
@@ -295,6 +305,16 @@ class PassengerCar(Car):
         classification = classification.upper()
         self._classification = classification
 
+    def represent_as_row(self):
+        row = [
+            self._mark, self._model,
+            self._registration_number, self._seats,
+            self._fuel_consumption, self._doors,
+            self._color, self._price, self._body,
+            self._classification, 'n/d', 'n/d', 'Osobowy'
+        ]
+        return row
+
     def rows_to_table(self):
         rows = super().rows_to_table()
         rows += [
@@ -360,6 +380,18 @@ class Van(Car):
         if side_door not in {0, 1}:
             raise WrongSideDoorValueError(side_door)
         self._side_door = bool(side_door)
+
+    def represent_as_row(self):
+        row = [
+            self._mark, self._model,
+            self._registration_number, self._seats,
+            self._fuel_consumption, self._doors,
+            self._color, self._price, 'n/d',
+            'n/d', self._capacity,
+            'Tak' if self._side_door else 'Nie',
+            'Dostawczy'
+        ]
+        return row
 
     def rows_to_table(self):
         rows = super().rows_to_table()
