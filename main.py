@@ -1,5 +1,7 @@
 import os
+from terminaltables import AsciiTable
 from classes import Car, PassengerCar, Van
+from modelio import get_list_of_cars
 
 
 def clear_terminal():
@@ -55,7 +57,72 @@ def add_car():
 
 
 def manipulate_car():
+    parameters = {}
+    while True:
+        result = get_list_of_cars(parameters)
+        list_of_cars = []
+        for element in result:
+            if element[-1] == 0:
+                auto = Car(*element[1:-5], element[0])
+            elif element[-1] == 1:
+                auto = PassengerCar(*element[1:11], element[0])
+            else:
+                auto = Van(*element[1:9], *element[11:12], element[0])
+            list_of_cars.append(auto)
+        table_data = [['Lp.', 'Marka', 'Model', 'Numer\nrejestracyjny',
+                       'Liczba\nmiejsc', 'Zużycie paliwa\n[L/100km]',
+                       'Liczba\ndrzwi', 'Kolor', 'Cena', 'Nadwozie', 'Klasa',
+                       'Pojemność\n[L]', 'Drzwi\nboczne', 'Rodzaj']]
+        for position, auto in enumerate(list_of_cars, start=1):
+            row = [position] + auto.represent_as_row()
+            table_data.append(row)
+        table = AsciiTable(table_data)
+        print(table.table)
+        print('Aby wybrać pojazd wpisz jego numer z tabeli.')
+        print('Aby zmienić parametry wyszukiwania wpisz "P"')
+        while True:
+            answer = input('Wybór: ')
+            answer = answer.upper()
+            if answer == 'P':
+                parameters_menu(parameters)
+            elif answer.isdigit():
+                answer = int(answer)
+                try:
+                    if answer == 0:
+                        raise IndexError(answer)
+                    display_car(list_of_cars[answer-1])
+                    return
+                except IndexError:
+                    print('Brak samochodu o takim numerze, spróbuj ponownie')
+            else:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+
+
+def parameters_menu(parameters: dict):
     pass
+
+
+def display_car(auto: Car):
+    clear_terminal()
+    auto.print_as_table()
+    print('\n1.Edytuj dane pojazdu\n2.Usuwanie pojazdu\n9.Powrót')
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer.isdigit():
+            answer = int(answer)
+            if answer in {1, 2, 9}:
+                if answer == 1:
+                    auto.edit_values()
+                if answer == 2:
+                    auto.delete_from_database()
+                    return
+                else:
+                    return
+            else:
+                print('Niepoprawna wartość, spróbuj ponownie')
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
 
 
 def search_car(parameters):

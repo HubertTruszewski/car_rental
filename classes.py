@@ -206,6 +206,115 @@ class Car:
             except NegativePriceError:
                 print('Cena nie może byc ujemna, spróbuj ponownie')
 
+    def insert_edited_values(self):
+        changed_values = {}
+        mark = input('Marka [{}]: '.format(self._mark))
+        if mark != '':
+            self.set_mark(mark)
+            changed_values['mark'] = self._mark
+
+        model = input('Model [{}]: '.format(self._model))
+        if model != '':
+            self.set_model(model)
+            changed_values['model'] = self._model
+
+        text = 'Numer rejestracyjny [{}]: '.format(self._registration_number)
+        registration_number = input(text)
+        if registration_number != '':
+            self.set_registration_number(registration_number)
+            changed_values['registration_number'] = registration_number
+
+        correct_value = False
+        while not correct_value:
+            seats = input('Liczba miejsc [{}]: '.format(self._seats))
+            if seats == '':
+                break
+            try:
+                self.set_seats(seats)
+                correct_value = True
+                changed_values['seats'] = self._seats
+            except WrongSeatsTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeSeatsError:
+                print('Liczba miejsc nie może być ujemna, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            text = 'Zużycie paliwa [{}]: '.format(self._fuel_consumption)
+            fuel_consumption = input(text)
+            if fuel_consumption == '':
+                break
+            try:
+                self.set_fuel_consumption(fuel_consumption)
+                correct_value = True
+                changed_values['fuel_consumption'] = self._fuel_consumption
+            except WrongFuelConsumptionTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeFuelConsumptionError:
+                print('Zużycie paliwa nie może być ujemne, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            doors = input('Liczba drzwi [{}]: '.format(self._doors))
+            if doors == '':
+                break
+            try:
+                self.set_doors(doors)
+                correct_value = True
+                changed_values['doors'] = self._doors
+            except WrongDoorsTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeDoorsError:
+                print('Liczba drzwi nie może być ujemna')
+
+        color = input('Kolor [{}]: '.format(self._color))
+        if color != '':
+            self.set_color(color)
+            changed_values['color'] = self._color
+
+        correct_value = False
+        while not correct_value:
+            price = input('Cena [{}]: '.format(self._price))
+            if price == '':
+                break
+            try:
+                self.set_price(price)
+                correct_value = True
+                changed_values['price'] = self._price
+            except WrongPriceTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativePriceError:
+                print('Cena nie może byc ujemna, spróbuj ponownie')
+        return changed_values
+
+    def edit_values(self):
+        changed_values = self.insert_edited_values()
+        self.print_as_table()
+        if len(changed_values) == 0:
+            print('Nie zmieniono żadnych danych\nNaciśnij enter')
+            input()
+            return
+        correct_value = False
+        while not correct_value:
+            answer = input('\nCzy zmienić dane na powyższe? 0=Nie, 1=Tak: ')
+            if answer.isdigit():
+                answer = int(answer)
+                if answer in {0, 1}:
+                    if answer == 0:
+                        print('Anulowano zmianę danych\nNaciśnij enter')
+                        input()
+                        return
+                    else:
+                        query = self.generate_set_query(changed_values)
+                        query_to_database(query)
+                        correct_value = True
+                        print('Zmieniono dane pojazdu\nNaciśnij enter')
+                        input()
+                else:
+                    print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
+            else:
+                print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
+
     def represent_as_row(self):
         row = [
             self._mark, self._model,
@@ -328,6 +437,7 @@ class PassengerCar(Car):
         return self._classification
 
     def set_body(self, body):
+        body = body.lower()
         self._body = body
 
     def set_classification(self, classification):
@@ -352,13 +462,26 @@ class PassengerCar(Car):
         ]
         return rows
 
+    def insert_edited_values(self):
+        changed_values = super().insert_edited_values()
+
+        body = input('Nadwozie [{}]: '.format(self._body))
+        if body != '':
+            self.set_body(body)
+            changed_values['body'] = self._body
+
+        classification = input('Klasa [{}]: '.format(self._classification))
+        if classification != '':
+            self.set_classification(classification)
+            changed_values['classification'] = self._classification
+
+        return changed_values
+
     def insert_values(self):
         super().insert_values()
         body = input('Nadwozie: ')
-        body = body.lower()
         self.set_body(body)
         classification = input('Klasa: ')
-        classification = classification.upper()
         self.set_classification(classification)
 
     def generate_insert_query(self):
@@ -429,6 +552,42 @@ class Van(Car):
             ['Boczne drzwi', 'Tak' if self._side_door else 'Nie']
         ]
         return rows
+
+    def insert_edited_values(self):
+        changed_values = super().insert_edited_values()
+
+        correct_value = False
+        while not correct_value:
+            capacity = input('Pojemność [{}]: '.format(self._capacity))
+            if capacity == '':
+                break
+            try:
+                self.set_capacity(capacity)
+                correct_value = True
+                changed_values['capacity'] = self._capacity
+            except WrongCapacityTypeError:
+                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+            except NegativeCapacityError:
+                print('Pojemność nie może być ujemna, spróbuj ponownie')
+
+        correct_value = False
+        while not correct_value:
+            word = 'Tak' if self._side_door else 'Nie'
+            text = 'Czy posiada boczne drzwi? 0=Nie, 1=Tak [{}]: '.format(word)
+            side_door = input(text)
+            if side_door == '':
+                break
+            try:
+                self.set_side_door(side_door)
+                correct_value = True
+                correct_value['side_door'] = self._side_door
+            except WrongSideDoorTypeError:
+                print('Wprowadzona wartość musi być liczbą 0 lub 1,'
+                      ' spróbuj ponownie')
+            except WrongSideDoorValueError:
+                print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
+
+        return changed_values
 
     def insert_values(self):
         super().insert_values()
