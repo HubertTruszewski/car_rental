@@ -19,9 +19,11 @@ def get_list_of_cars(parameters):
     query = 'SELECT * FROM cars'
     if len(parameters) > 0:
         query += ' WHERE'
-        for key in parameters:
-            value = parameters[key]
-            query += ' {}="{}" AND'.format(key, value)
+        for key, _, value in parameters:
+            if type(value) is str:
+                query += ' {}="{}" AND'.format(key, value)
+            else:
+                query += ' {}={} AND'.format(key, value)
         query = query[:-4]
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()

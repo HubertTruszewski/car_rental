@@ -57,8 +57,9 @@ def add_car():
 
 
 def manipulate_car():
-    parameters = {}
+    parameters = []
     while True:
+        clear_terminal()
         result = get_list_of_cars(parameters)
         list_of_cars = []
         for element in result:
@@ -85,6 +86,7 @@ def manipulate_car():
             answer = answer.upper()
             if answer == 'P':
                 parameters_menu(parameters)
+                break
             elif answer.isdigit():
                 answer = int(answer)
                 try:
@@ -96,10 +98,150 @@ def manipulate_car():
                     print('Brak samochodu o takim numerze, spróbuj ponownie')
             else:
                 print('Niepoprawna wartość, spróbuj jeszcze raz')
+        continue
 
 
-def parameters_menu(parameters: dict):
-    pass
+def parameters_menu(parameters: list):
+    while True:
+        clear_terminal()
+        if len(parameters) == 0:
+            print('Brak ustawionych kryteriów\n')
+        else:
+            print('Zadane kryteria:')
+            for position, (key, name, value) in enumerate(parameters, start=1):
+                if key == 'side_door':
+                    text = 'Tak' if value else 'Nie'
+                elif key == 'type_id':
+                    type_dict = {1: 'Osobowy', 2: 'Dostawczy', 3: 'Inny'}
+                    text = type_dict[value]
+                else:
+                    text = value
+                print(f'{position}. {name} = {text}')
+            print('\n\n')
+
+        print('1. Dodanie kryteriów\n2. Edycja kryterium')
+        print('3. Usunięcie kryterium')
+        print('4. Wyszukiwanie z powyższymi kryteriami')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer.isdigit():
+                answer = int(answer)
+                if answer == 1:
+                    print('1. Marka\n2. Model\n3. Numer rejestracyjny')
+                    print('4. Liczba miejsc')
+                    print('5. Zużycie paliwa\n6. Liczba drzwi\n7. Kolor')
+                    print('8. Cena\n9. Nadwozie\n10. Klasa\n11. Pojemność')
+                    print('12. Boczne drzwi\n13. Typ')
+                    param_choose = input('Wybór: ')
+                    if param_choose.isdigit():
+                        param_choose = int(param_choose)
+                        if param_choose > 13:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                        else:
+                            if param_choose == 12:
+                                print('Dozwolone wartości: 0=Nie, 1=Tak')
+                            if param_choose == 13:
+                                print('Dozwolone wartości: 1=Osobowy, 2=Dostawczy, 3=Inny')
+                            param_value = input('Wartość parametru: ')
+                            if param_choose == 1:
+                                parameters.append(('mark', 'Marka', param_value))
+                            if param_choose == 2:
+                                parameters.append(('model', 'Model', param_value))
+                            if param_choose == 3:
+                                parameters.append(('registration_number',
+                                                   'Numer rejestracyjny',
+                                                   param_value))
+                            if param_choose == 4:
+                                parameters.append(('seats',
+                                                   'Liczba miejsc', param_value))
+                            if param_choose == 5:
+                                parameters.append(('fuel_consumption',
+                                                   'Zużycie paliwa', param_value))
+                            if param_choose == 6:
+                                parameters.append(('doors', 'Drzwi', param_value))
+                            if param_choose == 7:
+                                parameters.append(('color', 'Kolor', param_value))
+                            if param_choose == 8:
+                                parameters.append(('price', 'Cena', param_value))
+                            if param_choose == 9:
+                                parameters.append(('body', 'Nadwozie',
+                                                   param_value))
+                            if param_choose == 10:
+                                parameters.append(('classification', 'Klasa',
+                                                   param_value))
+                            if param_choose == 11:
+                                parameters.append(('capacity', 'Pojemność',
+                                                   param_value))
+                            if param_choose == 12:
+                                correct_param_value = False
+                                while not correct_param_value:
+                                    if param_value in {0, 1}:
+                                        param_value = int(param_value)
+                                        parameters.append(('side_door', 'Drzwi boczne',
+                                                           param_value))
+                                        correct_param_value = True
+                                    else:
+                                        print('Niepoprawna wartość, spróbuj ponownie')
+                            if param_choose == 13:
+                                correct_param_value = False
+                                while not correct_param_value:
+                                    if param_value in {'1', '2', '3'}:
+                                        param_value = int(param_value)
+                                        if param_value == 3:
+                                            param_value = 0
+                                        parameters.append(('type_id', 'Typ', param_value))
+                                        correct_param_value = True
+                                    else:
+                                        print('Niepoprawna wartość, spróbuj ponownie')
+                                        param_value = input('Wybór: ')
+                        break
+                    else:
+                        print('Niepoprawna wartość, spróbuj ponownie')
+                elif answer == 2:
+                    print('Podaj numer z listy parametru do zmiany:')
+                    correct_value = False
+                    while not correct_value:
+                        answer = input('Numer kryterium: ')
+                        if answer.isdigit():
+                            answer = int(answer)
+                            if answer == 0:
+                                break
+                        else:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                            continue
+                        value = input('Nowa wartość parametru: ')
+                        try:
+                            key, name = parameters[answer-1][:2]
+                            parameters[answer-1] = (key, name, value)
+                            correct_value = True
+                        except IndexError:
+                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                    break
+                elif answer == 3:
+                    print('Podaj numer z listy parametru do usunięcia:')
+                    correct_value = False
+                    while not correct_value:
+                        answer = input('Numer kryterium: ')
+                        if answer.isdigit():
+                            answer = int(answer)
+                            if answer == 0:
+                                break
+                        else:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                        try:
+                            parameters.pop(answer-1)
+                            correct_value = True
+                        except IndexError:
+                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                    break
+                elif answer == 4:
+                    return
+                else:
+                    print('Nieprawidłowa wartość, spróbuj ponownie')
+            else:
+                print('Nieprawidłowa wartość, spróbuj ponownie')
+        continue
 
 
 def display_car(auto: Car):
