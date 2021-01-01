@@ -176,7 +176,7 @@ def parameters_menu(parameters: list):
                             if param_choose == 12:
                                 correct_param_value = False
                                 while not correct_param_value:
-                                    if param_value in {0, 1}:
+                                    if param_value in {'0', '1'}:
                                         param_value = int(param_value)
                                         parameters.append(('side_door', 'Drzwi boczne',
                                                            param_value))
