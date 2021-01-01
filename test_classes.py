@@ -256,6 +256,23 @@ def test_car_generate_delete_query():
     assert result == query
 
 
+def test_car_generate_set_query():
+    auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200, 12)
+    values = {'mark': 'Opel', 'model': 'Astra', 'seats': '7'}
+    result = auto.generate_set_query(values)
+    query = 'UPDATE cars SET mark="Opel", '\
+            'model="Astra", seats="7" WHERE db_id=12'
+    assert result == query
+
+
+def test_car_generate_set_query_one_change():
+    auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200, 12)
+    values = {'mark': 'Opel'}
+    result = auto.generate_set_query(values)
+    query = 'UPDATE cars SET mark="Opel" WHERE db_id=12'
+    assert result == query
+
+
 def test_passengercar_represent_as_row():
     auto = PassengerCar('Nissan', 'Juke', 'We48482', 5, 9.8, 5, 'czarny',
                         200, 'hatchback', 'D')

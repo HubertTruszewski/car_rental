@@ -1,5 +1,5 @@
 from terminaltables import AsciiTable
-from modelio import insert_to_database
+from modelio import query_to_database
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -93,7 +93,6 @@ class Car:
 
     def set_db_id(self, db_id):
         try:
-            print(db_id)
             db_id = int(db_id)
         except Exception:
             raise WrongDbIdTypeError(db_id)
@@ -251,6 +250,15 @@ class Car:
     def generate_delete_query(self):
         return f'DELETE FROM cars WHERE db_id={self._db_id}'
 
+    def generate_set_query(self, values: dict):
+        query = 'UPDATE cars SET '
+        for key in values:
+            value = values[key]
+            query += '{}="{}", '.format(key, value)
+        query = query[:-2]
+        query += ' WHERE db_id={}'.format(self._db_id)
+        return query
+
     def add_to_database(self):
         self.insert_values()
         self.print_as_table()
@@ -266,7 +274,7 @@ class Car:
                         return
                     else:
                         query = self.generate_insert_query()
-                        insert_to_database(query)
+                        query_to_database(query)
                         correct_value = True
                         print('Dodano samochód do bazy\nNaciśnij enter')
                         input()
@@ -274,6 +282,27 @@ class Car:
                     print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
             else:
                 print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
+
+    def delete_from_database(self):
+        correct_value = False
+        while not correct_value:
+            answer = input('Czy usunąć ten samochód z bazy? 0=Nie, 1=Tak: ')
+            if answer.isdigit():
+                answer = int(answer)
+                if answer == 0:
+                    print('Anulowano usunięcie z bazy\nWciśnij enter')
+                    input()
+                    return
+                elif answer == 1:
+                    query = self.generate_delete_query()
+                    query_to_database(query)
+                    print('Usunięto samochód z bazy\nWciśnij enter')
+                    input()
+                    return
+                else:
+                    print('Niepoprawna wartość, spróbuj ponownie')
+            else:
+                print('Niepoprawna wartość, spróbuj ponownie')
 
 
 class PassengerCar(Car):
