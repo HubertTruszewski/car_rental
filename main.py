@@ -56,7 +56,7 @@ def add_car():
             print('Niepoprawna wartość, spróbuj jeszcze raz')
 
 
-def manipulate_car():
+def search_car():
     parameters = []
     while True:
         clear_terminal()
@@ -92,8 +92,7 @@ def manipulate_car():
                 try:
                     if answer == 0:
                         raise IndexError(answer)
-                    display_car(list_of_cars[answer-1])
-                    return
+                    return list_of_cars[answer-1]
                 except IndexError:
                     print('Brak samochodu o takim numerze, spróbuj ponownie')
             else:
@@ -244,7 +243,8 @@ def parameters_menu(parameters: list):
         continue
 
 
-def display_car(auto: Car):
+def display_car():
+    auto = search_car()
     clear_terminal()
     auto.print_as_table()
     print('\n1.Edytuj dane pojazdu\n2.Usuwanie pojazdu\n9.Powrót')
@@ -265,10 +265,6 @@ def display_car(auto: Car):
                 print('Niepoprawna wartość, spróbuj ponownie')
         else:
             print('Niepoprawna wartość, spróbuj ponownie')
-
-
-def search_car(parameters):
-    pass
 
 
 def auto_menu():
@@ -292,7 +288,7 @@ def auto_menu():
             add_car()
             return
         elif answer == 2:
-            manipulate_car()
+            display_car()
         elif answer == 9:
             return
         else:
