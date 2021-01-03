@@ -625,3 +625,70 @@ class Van(Car):
                              self._color, self._price, self._capacity,
                              int(self._side_door), self._type_id)
         return query
+
+
+class Reservation:
+    def __init__(self, db_id=None, name=None, surname=None, startdate=None,
+                 enddate=None, auto_id=None):
+        if db_id:
+            self._db_id = db_id
+        else:
+            self._db_id = None
+        if name:
+            self._name = name
+        else:
+            self._name = None
+        if surname:
+            self._surname = surname
+        else:
+            self._surname = None
+        if startdate:
+            self._startdate = startdate
+        else:
+            self._startdate = None
+        if enddate:
+            self._enddate = enddate
+        else:
+            self._enddate = None
+        if auto_id:
+            self._auto_id = auto_id
+        else:
+            self._auto_id = None
+
+    def db_id(self):
+        return self._db_id
+
+    def name(self):
+        return self._name
+
+    def surname(self):
+        return self._surname
+
+    def startdate(self):
+        return self._startdate
+
+    def enddate(self):
+        return self._enddate
+
+    def auto_id(self):
+        return self._auto_id
+
+    def set_name(self, name):
+        name = name.title()
+        self._name = name
+
+    def set_surname(self, surname):
+        surname = surname.title()
+        self._surname = surname
+
+    def set_startdate(self, startdate):
+        self._startdate = startdate
+
+    def set_enddate(self, enddate):
+        self._enddate = enddate
+
+    def set_auto_id(self, auto_id):
+        self._auto_id = auto_id
+
+    def insert_values(self):
+        pass
