@@ -1,5 +1,7 @@
+import datetime
+import os
 from terminaltables import AsciiTable
-from modelio import query_to_database
+from modelio import get_list_of_cars, query_to_database
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -8,6 +10,202 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongDoorsTypeError, NegativeDoorsError,
                     WrongPriceTypeError, NegativePriceError,
                     WrongSideDoorTypeError, WrongSideDoorValueError)
+
+
+def clear_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def change_to_car(element):
+    if element[-1] == 0:
+        auto = Car(*element[1:-5], element[0])
+    elif element[-1] == 1:
+        auto = PassengerCar(*element[1:11], element[0])
+    else:
+        auto = Van(*element[1:9], *element[11:12], element[0])
+    return auto
+
+
+def parameters_menu(parameters: list):
+    while True:
+        clear_terminal()
+        if len(parameters) == 0:
+            print('Brak ustawionych kryteriów\n')
+        else:
+            print('Zadane kryteria:')
+            for position, (key, name, value) in enumerate(parameters, start=1):
+                if key == 'side_door':
+                    text = 'Tak' if value else 'Nie'
+                elif key == 'type_id':
+                    type_dict = {1: 'Osobowy', 2: 'Dostawczy', 3: 'Inny'}
+                    text = type_dict[value]
+                else:
+                    text = value
+                print(f'{position}. {name} = {text}')
+            print('\n\n')
+
+        print('1. Dodanie kryteriów\n2. Edycja kryterium')
+        print('3. Usunięcie kryterium')
+        print('4. Wyszukiwanie z powyższymi kryteriami')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer.isdigit():
+                answer = int(answer)
+                if answer == 1:
+                    print('1. Marka\n2. Model\n3. Numer rejestracyjny')
+                    print('4. Liczba miejsc')
+                    print('5. Zużycie paliwa\n6. Liczba drzwi\n7. Kolor')
+                    print('8. Cena\n9. Nadwozie\n10. Klasa\n11. Pojemność')
+                    print('12. Boczne drzwi\n13. Typ')
+                    param_choose = input('Wybór: ')
+                    if param_choose.isdigit():
+                        param_choose = int(param_choose)
+                        if param_choose > 13:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                        else:
+                            if param_choose == 12:
+                                print('Dozwolone wartości: 0=Nie, 1=Tak')
+                            if param_choose == 13:
+                                print('Dozwolone wartości: 1=Osobowy, 2=Dostawczy, 3=Inny')
+                            param_value = input('Wartość parametru: ')
+                            if param_choose == 1:
+                                parameters.append(('mark', 'Marka', param_value))
+                            if param_choose == 2:
+                                parameters.append(('model', 'Model', param_value))
+                            if param_choose == 3:
+                                parameters.append(('registration_number',
+                                                   'Numer rejestracyjny',
+                                                   param_value))
+                            if param_choose == 4:
+                                parameters.append(('seats',
+                                                   'Liczba miejsc', param_value))
+                            if param_choose == 5:
+                                parameters.append(('fuel_consumption',
+                                                   'Zużycie paliwa', param_value))
+                            if param_choose == 6:
+                                parameters.append(('doors', 'Drzwi', param_value))
+                            if param_choose == 7:
+                                parameters.append(('color', 'Kolor', param_value))
+                            if param_choose == 8:
+                                parameters.append(('price', 'Cena', param_value))
+                            if param_choose == 9:
+                                parameters.append(('body', 'Nadwozie',
+                                                   param_value))
+                            if param_choose == 10:
+                                parameters.append(('classification', 'Klasa',
+                                                   param_value))
+                            if param_choose == 11:
+                                parameters.append(('capacity', 'Pojemność',
+                                                   param_value))
+                            if param_choose == 12:
+                                correct_param_value = False
+                                while not correct_param_value:
+                                    if param_value in {'0', '1'}:
+                                        param_value = int(param_value)
+                                        parameters.append(('side_door', 'Drzwi boczne',
+                                                           param_value))
+                                        correct_param_value = True
+                                    else:
+                                        print('Niepoprawna wartość, spróbuj ponownie')
+                            if param_choose == 13:
+                                correct_param_value = False
+                                while not correct_param_value:
+                                    if param_value in {'1', '2', '3'}:
+                                        param_value = int(param_value)
+                                        if param_value == 3:
+                                            param_value = 0
+                                        parameters.append(('type_id', 'Typ', param_value))
+                                        correct_param_value = True
+                                    else:
+                                        print('Niepoprawna wartość, spróbuj ponownie')
+                                        param_value = input('Wybór: ')
+                        break
+                    else:
+                        print('Niepoprawna wartość, spróbuj ponownie')
+                elif answer == 2:
+                    print('Podaj numer z listy parametru do zmiany:')
+                    correct_value = False
+                    while not correct_value:
+                        answer = input('Numer kryterium: ')
+                        if answer.isdigit():
+                            answer = int(answer)
+                            if answer == 0:
+                                break
+                        else:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                            continue
+                        value = input('Nowa wartość parametru: ')
+                        try:
+                            key, name = parameters[answer-1][:2]
+                            parameters[answer-1] = (key, name, value)
+                            correct_value = True
+                        except IndexError:
+                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                    break
+                elif answer == 3:
+                    print('Podaj numer z listy parametru do usunięcia:')
+                    correct_value = False
+                    while not correct_value:
+                        answer = input('Numer kryterium: ')
+                        if answer.isdigit():
+                            answer = int(answer)
+                            if answer == 0:
+                                break
+                        else:
+                            print('Niepoprawna wartość, spróbuj ponownie')
+                        try:
+                            parameters.pop(answer-1)
+                            correct_value = True
+                        except IndexError:
+                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                    break
+                elif answer == 4:
+                    return
+                else:
+                    print('Nieprawidłowa wartość, spróbuj ponownie')
+            else:
+                print('Nieprawidłowa wartość, spróbuj ponownie')
+        continue
+
+
+def search_car(reservation_param=[]):
+    parameters = []
+    while True:
+        clear_terminal()
+        result = get_list_of_cars(parameters, reservation_param)
+        list_of_cars = []
+        for element in result:
+            auto = change_to_car(element)
+            list_of_cars.append(auto)
+        table_data = [['Lp.', 'Marka', 'Model', 'Numer\nrejestracyjny',
+                       'Liczba\nmiejsc', 'Zużycie paliwa\n[L/100km]',
+                       'Liczba\ndrzwi', 'Kolor', 'Cena', 'Nadwozie', 'Klasa',
+                       'Pojemność\n[L]', 'Drzwi\nboczne', 'Rodzaj']]
+        for position, auto in enumerate(list_of_cars, start=1):
+            row = [position] + auto.represent_as_row()
+            table_data.append(row)
+        table = AsciiTable(table_data)
+        print(table.table)
+        print('Aby wybrać pojazd wpisz jego numer z tabeli.')
+        print('Aby zmienić parametry wyszukiwania wpisz "P"')
+        while True:
+            answer = input('Wybór: ')
+            answer = answer.upper()
+            if answer == 'P':
+                parameters_menu(parameters)
+                break
+            elif answer.isdigit():
+                answer = int(answer)
+                try:
+                    if answer == 0:
+                        raise IndexError(answer)
+                    return list_of_cars[answer-1]
+                except IndexError:
+                    print('Brak samochodu o takim numerze, spróbuj ponownie')
+            else:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+        continue
 
 
 class Car:
@@ -379,8 +577,9 @@ class Car:
                 if answer in {0, 1}:
                     if answer == 0:
                         print('Anulowano dodanie do bazy\nNaciśnij enter')
+                        correct_value = True
                         input()
-                        return
+                        # return
                     else:
                         query = self.generate_insert_query()
                         query_to_database(query)
@@ -628,8 +827,8 @@ class Van(Car):
 
 
 class Reservation:
-    def __init__(self, db_id=None, name=None, surname=None, startdate=None,
-                 enddate=None, auto_id=None):
+    def __init__(self, name=None, surname=None, startdate=None,
+                 enddate=None, auto_id=None, db_id=None):
         if db_id:
             self._db_id = db_id
         else:
@@ -690,5 +889,83 @@ class Reservation:
     def set_auto_id(self, auto_id):
         self._auto_id = auto_id
 
+    def generate_insert_query(self):
+        query = 'INSERT INTO reservations (firstname, surname, startdate, '\
+                'enddate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", {}, "aktywna")'
+        query = query.format(self._name, self._surname, self._startdate, self._enddate,
+                             self._auto_id)
+        return query
+
+    def print_as_table(self):
+        table_data = [
+                    ['Imię', self._name],
+                    ['Nazwisko', self._surname],
+                    ['Data początkowa', self._startdate],
+                    ['Data końcowa', self._enddate],
+                    ['Marka samochodu', self.auto.mark()],
+                    ['Model', self.auto.model()],
+                    ['Numer rejestracyjny', self.auto.registration_number()]
+        ]
+        table = AsciiTable(table_data)
+        table.title = 'Dane rezerwacji'
+        table.inner_heading_row_border = False
+        print(table.table)
+
     def insert_values(self):
-        pass
+        name = input('Imię: ')
+        self.set_name(name)
+        surname = input('Nazwisko: ')
+        self.set_surname(surname)
+        startdate = None
+        enddate = None
+        correct_values = False
+        while not correct_values:
+            correct_date_format = False
+            while not correct_date_format:
+                startdate = input('Data początkowa: ')
+                try:
+                    startdate = datetime.date.fromisoformat(startdate)
+                    correct_date_format = True
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            correct_date_format = False
+            while not correct_date_format:
+                enddate = input('Data końcowa: ')
+                try:
+                    enddate = datetime.date.fromisoformat(enddate)
+                    correct_date_format = True
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            if startdate > enddate:
+                print('Data końca nie może być wcześniej niż data początku. Spróbuj ponownie')
+            else:
+                correct_values = True
+                self.set_enddate(enddate)
+                self.set_startdate(startdate)
+        reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        auto = search_car(reservation_parameters)
+        self.auto = auto
+        self._auto_id = auto.db_id()
+
+    def add_to_database(self):
+        self.insert_values()
+        self.print_as_table()
+        print('\nCzy dodać powyższą rezerwację do bazy? 0=Nie, 1=Tak')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer in {'0', '1'}:
+                answer = int(answer)
+                correct_value = True
+                if answer == 1:
+                    query = self.generate_insert_query()
+                    query_to_database(query)
+                    print('Dodano rezerwację do bazy\nWciśnij enter')
+                    input()
+                else:
+                    print('Anulowano dodanie do bazy\nWciśnij enter')
+                    input()
+            else:
+                print('Niepoprawna wartość, spróbuj ponownie')

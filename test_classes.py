@@ -1,4 +1,5 @@
-from classes import Car, PassengerCar, Van
+import datetime
+from classes import Car, PassengerCar, Reservation, Van
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -366,4 +367,24 @@ def test_van_generate_delete_query():
                250, 600, False, 15)
     result = auto.generate_delete_query()
     query = 'DELETE FROM cars WHERE db_id=15'
+    assert result == query
+
+
+def test_reservation_constructor():
+    reservation = Reservation(2, 'Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                              datetime.date(2021, 1, 1), 3)
+    assert reservation.db_id() == 2
+    assert reservation.name() == 'Jan'
+    assert reservation.surname() == 'Kowalski'
+    assert reservation.startdate().isoformat() == "2020-12-29"
+    assert reservation.enddate().isoformat() == "2021-01-01"
+    assert reservation.auto_id() == 3
+
+
+def test_reservations_generate_insert_query():
+    reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                              datetime.date(2021, 1, 1), 3)
+    query = 'INSERT INTO reservations (name, surname, startdate, enddate, auto_id) '\
+            'VALUES ("Jan", "Kowalski", "2020-12-29", "2021-01-01", 3)'
+    result = reservation.generate_insert_query()
     assert result == query
