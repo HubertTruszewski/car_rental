@@ -1,6 +1,7 @@
+import datetime
 import os
 # from terminaltables import AsciiTable
-from classes import Car, PassengerCar, Reservation, Van
+from classes import Car, PassengerCar, Reservation, Van, search_reservation
 # from modelio import get_list_of_cars
 from classes import search_car
 
@@ -87,7 +88,38 @@ def add_reservation():
 
 
 def manipulate_reservation():
-    pass
+    data = datetime.date.today()
+    correct_value = False
+    while not correct_value:
+        answer = input('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data))
+        if answer != '':
+            try:
+                data = datetime.date.fromisoformat(answer)
+                correct_value = True
+            except ValueError as e:
+                print('Niepoprawna wartość. Szczegóły: '+str(e))
+                print('Spróbuj ponownie')
+        else:
+            correct_value = True
+    reservation = search_reservation(data)
+    if reservation is None:
+        return
+    clear_terminal()
+    reservation.print_as_table()
+    print('\n1. Edycja rezerwacji\n2. Usuwanie rezerwacji\n9. Powrót')
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer in {'1', '2', '9'}:
+            answer = int(answer)
+            if answer == 1:
+                reservation.edit_values()
+            elif answer == 2:
+                reservation.cancel_reservation()
+            else:
+                return
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
 
 
 def auto_menu():
@@ -122,7 +154,7 @@ def auto_menu():
 def reservation_menu():
     clear_terminal()
     print('MENU - REZERWACJE')
-    print('1. Nowa rezerwacja\n2. Edycja, anulowanie, usuwanie rezerwacji\n3. Powrót')
+    print('1. Nowa rezerwacja\n2. Wyświetlenie, edycja, anulowanie rezerwacji\n3. Powrót')
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')

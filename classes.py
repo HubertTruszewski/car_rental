@@ -1,7 +1,8 @@
 import datetime
 import os
 from terminaltables import AsciiTable
-from modelio import get_list_of_cars, query_to_database
+from modelio import get_car_by_id, get_list_of_cars, get_list_of_reservations, query_to_database
+from modelio import get_list_of_id_free_cars
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -24,6 +25,11 @@ def change_to_car(element):
     else:
         auto = Van(*element[1:9], *element[11:12], element[0])
     return auto
+
+
+def change_to_reservation(element):
+    reservation = Reservation(*element[1:6], element[0], element[6])
+    return reservation
 
 
 def parameters_menu(parameters: list):
@@ -206,6 +212,35 @@ def search_car(reservation_param=[]):
             else:
                 print('Niepoprawna wartość, spróbuj jeszcze raz')
         continue
+
+
+def search_reservation(data):
+    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
+                   'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']]
+    result = get_list_of_reservations(data)
+    list_of_reservations = []
+    for index, element in enumerate(result, start=1):
+        reservation = change_to_reservation(element)
+        list_of_reservations.append(reservation)
+        table_data.append([index] + reservation.represent_as_row())
+    table = AsciiTable(table_data)
+    print(table.table)
+    print('\nAby wybrać rezerwację wpisz jej numer z listy')
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer.isdigit():
+            answer = int(answer)
+            if answer == 0:
+                return
+            try:
+                value_to_return = list_of_reservations[answer-1]
+                correct_value = True
+                return value_to_return
+            except IndexError:
+                print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
 
 
 class Car:
@@ -828,7 +863,7 @@ class Van(Car):
 
 class Reservation:
     def __init__(self, name=None, surname=None, startdate=None,
-                 enddate=None, auto_id=None, db_id=None):
+                 enddate=None, auto_id=None, db_id=None, status=None):
         if db_id:
             self._db_id = db_id
         else:
@@ -851,8 +886,14 @@ class Reservation:
             self._enddate = None
         if auto_id:
             self._auto_id = auto_id
+            result = get_car_by_id(self._auto_id)
+            self.auto = change_to_car(*result)
         else:
             self._auto_id = None
+        if status:
+            self._status = status
+        else:
+            self._status = None
 
     def db_id(self):
         return self._db_id
@@ -871,6 +912,9 @@ class Reservation:
 
     def auto_id(self):
         return self._auto_id
+
+    def status(self):
+        return self._status
 
     def set_name(self, name):
         name = name.title()
@@ -891,10 +935,28 @@ class Reservation:
 
     def generate_insert_query(self):
         query = 'INSERT INTO reservations (firstname, surname, startdate, '\
-                'enddate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", {}, "aktywna")'
+                'enddate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", {}, "{}")'
         query = query.format(self._name, self._surname, self._startdate, self._enddate,
-                             self._auto_id)
+                             self._auto_id, self._status)
         return query
+
+    def generate_cancel_query(self):
+        return f'UPDATE reservations SET status="anulowana" WHERE db_id={self._db_id}'
+
+    def generate_update_query(self, values: dict):
+        query = 'UPDATE reservations SET '
+        for key in values:
+            value = values.get(key)
+            query += '{}="{}", '.format(key, value)
+        query = query[:-2]
+        query += f'WHERE db_id={self._db_id}'
+        return query
+
+    def represent_as_row(self):
+        row = [self._name, self._surname, self._startdate, self._enddate,
+               self.auto.mark(), self.auto.model(), self.auto.registration_number(),
+               self.status()]
+        return row
 
     def print_as_table(self):
         table_data = [
@@ -948,6 +1010,97 @@ class Reservation:
         auto = search_car(reservation_parameters)
         self.auto = auto
         self._auto_id = auto.db_id()
+        self._status = 'aktywna'
+
+    def edit_values(self):
+        changed_values = {}
+        name = input('Imię [{}]: '.format(self._name))
+        if name != '':
+            changed_values['firstname'] = name
+        surname = input('Nazwisko [{}]: '.format(self._surname))
+        if surname != '':
+            changed_values['surname'] = surname
+        startdate = self._startdate
+        enddate = self._enddate
+        correct_value = False
+        changed_date = False
+        while not correct_value:
+            correct_date = False
+            while not correct_date:
+                startdate = input('Data początkowa [{}]: '.format(self._startdate))
+                if startdate != '':
+                    try:
+                        self._startdate = datetime.date.fromisoformat(startdate)
+                        changed_values['startdate'] = startdate
+                        correct_date = True
+                        changed_date = True
+                    except ValueError as e:
+                        print('Nieprawidłowa wartość. Szczegóły: '+str(e))
+                else:
+                    startdate = self._startdate
+                    break
+            correct_date = False
+            while not correct_date:
+                enddate = input('Data końcowa [{}]: '.format(self._enddate))
+                if enddate != '':
+                    try:
+                        self._enddate = datetime.date.fromisoformat(enddate)
+                        changed_values['enddate'] = enddate
+                        correct_date = True
+                        changed_date = True
+                    except ValueError as e:
+                        print('Nieprawidłowa wartość. Szczegóły: '+str(e))
+                else:
+                    enddate = self._enddate
+                    break
+            if startdate > enddate:
+                print('Data końca nie może być wcześniej niż data początku. Spróbuj ponownie')
+            else:
+                correct_value = True
+        parameters = {'startdate': startdate, 'enddate': enddate, 'res_id': self._db_id}
+        reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        list_of_id_free_cars = get_list_of_id_free_cars(parameters)
+        changed_auto = False
+        if changed_date and self._db_id not in list_of_id_free_cars:
+            print("Wybrany samochód jest już zajęty w wybranym terminie. Wybierz inny: (Wciśnij enter)")
+            input()
+            auto = search_car(reservation_parameters)
+            changed_auto = True
+            self.auto = auto
+            self._auto_id = auto.db_id()
+            changed_values['auto_id'] = self._auto_id
+        if not changed_auto:
+            print('Czy chcesz zmienić auto? 0=Nie, 1=Tak')
+            correct_value = False
+            while not correct_value:
+                answer = input('Wybór: ')
+                if answer == '0':
+                    break
+                elif answer == '1':
+                    auto = search_car(reservation_parameters)
+                    self.auto = auto
+                    self._auto_id = auto.db_id()
+                    changed_values['auto_id'] = self._auto_id
+                else:
+                    print('Niepoprawna wartość, spróbuj ponownie')
+        clear_terminal()
+        self.print_as_table()
+        print('Czy potwierdzasz zmianę rezerwacji? 0=Nie, 1=Tak')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer == '0':
+                print('Anulowano dodanie do bazy, wciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                query = self.generate_update_query(changed_values)
+                query_to_database(query)
+                print('Zmieniono rezerwację. Wciśnij enter')
+                input()
+                return
+            else:
+                print('Niepoprawna wartość, spróbuj ponownie')
 
     def add_to_database(self):
         self.insert_values()
@@ -969,3 +1122,20 @@ class Reservation:
                     input()
             else:
                 print('Niepoprawna wartość, spróbuj ponownie')
+
+    def cancel_reservation(self):
+        print('Czy na pewno anulować rezerwację? 0=Nie, 1=Tak')
+        while True:
+            answer = input('Wybór: ')
+            if answer == '0':
+                print('Anulowano anulowanie rezerwacji\nNaciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                query = self.generate_cancel_query()
+                query_to_database(query)
+                print('Anulowano rezerwację\nWciśnij enter')
+                input()
+                return
+            else:
+                print('Niepoprawny wybór. Spróbuj ponownie')
