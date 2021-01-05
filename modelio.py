@@ -1,11 +1,30 @@
+from errors import WrongConfigFileFormatError
 import mysql.connector
 import json
+
+
+def setup_config_file():
+    config = dict()
+    host = input('Adres serwera: ')
+    username = input('Nazwa użytkownika: ')
+    password = input('Hasło: ')
+    database = input('Nazwa bazy danych: ')
+    config['host'] = host
+    config['username'] = username
+    config['password'] = password
+    config['database'] = database
+    file = open('config.txt', 'w')
+    json.dump(config, file, indent=4)
+    file.close()
+    return config
 
 
 try:
     file = open('config.txt', 'r')
     config = json.load(file)
     file.close()
+    if len(config) != 4:
+        raise WrongConfigFileFormatError
 except FileNotFoundError:
     print('Nie znaleziono pliku konfiguracyjnego.\nUtworzyć teraz? 0=Nie, 1=Tak')
     correct_answer = False
@@ -17,21 +36,26 @@ except FileNotFoundError:
             input()
             exit()
         elif answer == '1':
-            config = dict()
-            host = input('Adres serwera: ')
-            username = input('Nazwa użytkownika: ')
-            password = input('Hasło: ')
-            database = input('Nazwa bazy danych: ')
-            config['host'] = host
-            config['username'] = username
-            config['password'] = password
-            config['database'] = database
-            file = open('config.txt', 'w')
-            json.dump(config, file, indent=4)
-            file.close()
+            config = setup_config_file()
             correct_answer = True
         else:
             print('Niepoprawny wybór, spróbuj ponownie')
+except WrongConfigFileFormatError:
+    print('Nieprawidłowy format pliku konfiguracyjnego.\nUtworzyć nowy? 0=Nie, 1=Tak')
+    correct_answer = False
+    while not correct_answer:
+        answer = input('Wybór: ')
+        if answer == '0':
+            print('Program nie może działać bez konfiguracji i zakończy działanie.')
+            print('Wciśnij enter')
+            input()
+            exit()
+        elif answer == '1':
+            config = setup_config_file()
+            correct_answer = True
+        else:
+            print('Niepoprawny wybór, spróbuj ponownie')
+
 except Exception:
     print('Problem z dostępem do konfiguracji!\nProgram zakończy działanie\nWciśnij enter')
     input()
