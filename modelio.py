@@ -85,12 +85,12 @@ def get_list_of_cars(parameters, reservation_param):
                 'c.fuel_consumption, c.doors, c.color, c.price, c.body, c.classification, '\
                 'c.capacity, c.side_door, c.type_id FROM cars as c '\
                 'WHERE c.db_id not in (SELECT r.auto_id from '\
-                'reservations as r where (r.startdate BETWEEN "{startdate}" '\
+                'reservations as r where r.status!="anulowana" AND ((r.startdate BETWEEN "{startdate}" '\
                 'AND "{enddate}") OR (r.enddate BETWEEN "{startdate}" AND "{enddate}") OR '\
                 '(r.startdate <= "{startdate}" AND r.enddate >= "{enddate}")) and c.db_id NOT IN '\
                 '(SELECT re.auto_id from rentals as re where (re.startdate BETWEEN "{startdate}" '\
                 'AND "{enddate}") OR (re.enddate BETWEEN "{startdate}" AND "{enddate}") OR '\
-                '(re.startdate <= "{startdate}" AND re.enddate >= "{enddate}"))'
+                '(re.startdate <= "{startdate}" AND re.enddate >= "{enddate}")))'
         query = query.format(**reservation_param)
     else:
         query = 'SELECT * FROM cars as c'
@@ -138,7 +138,7 @@ def get_list_of_id_free_cars(reservation_param):
             'c.fuel_consumption, c.doors, c.color, c.price, c.body, c.classification, '\
             'c.capacity, c.side_door, c.type_id FROM cars as c '\
             'WHERE c.db_id not in (SELECT r.auto_id from '\
-            'reservations as r where r.db_id!={res_id} AND ((r.startdate BETWEEN "{startdate}" '\
+            'reservations as r where r.status!="anulowana" AND r.db_id!={res_id} AND ((r.startdate BETWEEN "{startdate}" '\
             'AND "{enddate}") OR (r.enddate BETWEEN "{startdate}" AND "{enddate}") OR '\
             '(r.startdate <= "{startdate}" AND r.enddate >= "{enddate}"))) and c.db_id NOT IN '\
             '(SELECT re.auto_id from rentals as re where (re.startdate BETWEEN "{startdate}" '\

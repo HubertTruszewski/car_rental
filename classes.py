@@ -113,7 +113,7 @@ def parameters_menu(parameters: list):
                 if key == 'side_door':
                     text = 'Tak' if value else 'Nie'
                 elif key == 'type_id':
-                    type_dict = {1: 'Osobowy', 2: 'Dostawczy', 3: 'Inny'}
+                    type_dict = {1: 'Osobowy', 2: 'Dostawczy', 0: 'Inny'}
                     text = type_dict[value]
                 else:
                     text = value
@@ -1037,6 +1037,8 @@ class Reservation:
         self.set_startdate(startdate)
         reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
         auto = search_car(reservation_parameters)
+        if auto is None:
+            return 1
         self.auto = auto
         self._auto_id = auto.db_id()
         self._status = 'aktywna'
@@ -1091,6 +1093,10 @@ class Reservation:
                     print('Niepoprawna wartość, spróbuj ponownie')
         clear_terminal()
         self.print_as_table()
+        if len(changed_values) == 0:
+            print('Nie zmieniono żadnej wartośći\nWciśnij enter')
+            input()
+            return
         print('Czy potwierdzasz zmianę rezerwacji? 0=Nie, 1=Tak')
         correct_value = False
         while not correct_value:
@@ -1109,7 +1115,9 @@ class Reservation:
                 print('Niepoprawna wartość, spróbuj ponownie')
 
     def add_to_database(self):
-        self.insert_values()
+        returned_value = self.insert_values()
+        if returned_value == 1:
+            return
         self.print_as_table()
         print('\nCzy dodać powyższą rezerwację do bazy? 0=Nie, 1=Tak')
         correct_value = False

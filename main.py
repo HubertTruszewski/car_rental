@@ -1,8 +1,9 @@
 import datetime
 import os
-from classes import Car, PassengerCar, Rental, Reservation, Van, input_start_and_end_date, search_rental, search_reservation
-from classes import search_unpaid_rental
+from classes import Car, PassengerCar, Rental, Reservation, Van, input_date, input_start_and_end_date, search_rental
+from classes import search_unpaid_rental, search_reservation
 from classes import search_car
+from modelio import query_to_database
 
 
 def clear_terminal():
@@ -22,6 +23,12 @@ def print_logo():
 
 def print_line(number):
     print('-' * number)
+
+
+def cancel_uncollected_reservation():
+    query = 'UPDATE reservations SET status="anulowana" WHERE "{}">startdate AND status="aktywna"'
+    query = query.format(datetime.date.today())
+    query_to_database(query)
 
 
 def print_main_menu():
@@ -186,19 +193,20 @@ def reservation_menu():
 
 def collection_reservation():
     data = datetime.date.today()
+    data = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data), True, data)
     correct_value = False
+    reservation = None
     while not correct_value:
-        answer = input('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data))
-        if answer != '':
-            try:
-                data = datetime.date.fromisoformat(answer)
-                correct_value = True
-            except ValueError as e:
-                print('Niepoprawna wartość. Szczegóły: '+str(e))
-                print('Spróbuj ponownie')
+        reservation = search_reservation(data)
+        if reservation is None:
+            return
+        elif reservation.status() != 'aktywna':
+            print('Nie można wypożyczyć odebranej lub anulowanej rezerwacji')
+            print('Spróbuj ponownie\nWciśnij enter')
+            input()
+            clear_terminal()
         else:
             correct_value = True
-    reservation: Reservation = search_reservation(data)
     rental = Rental()
     rental.collect_reservation(reservation)
 
@@ -231,6 +239,7 @@ def rental_menu():
         answer = input('Wybór: ')
         if answer == '1':
             collection_reservation()
+            return
         elif answer == '2':
             new_rental()
             return
@@ -277,4 +286,5 @@ def main_menu():
 
 
 if __name__ == "__main__":
+    cancel_uncollected_reservation()
     main_menu()
