@@ -1,7 +1,8 @@
 import datetime
 import os
 # from terminaltables import AsciiTable
-from classes import Car, PassengerCar, Reservation, Van, search_reservation
+from classes import Car, PassengerCar, Rental, Reservation, Van, search_rental, search_reservation
+from classes import search_unpaid_rental
 # from modelio import get_list_of_cars
 from classes import search_car
 
@@ -18,7 +19,7 @@ def print_logo():
 #     # #     #    #    #####      #
 ####### #     #    #    #         # #
 #     # #     #    #    #        #   #
-#     #  #####     #    ####### #     #""")
+#     #  #####     #    ####### #     #"""[1:])
 
 
 def print_line(number):
@@ -127,7 +128,8 @@ def auto_menu():
     print("MENU - AUTA")
     print("Proszę wybrać jedną z dostępnych opcji:")
     print("1. Dodanie nowego samochodu")
-    print("2. Wyszukiwanie pojazdu, edycja danych, usuwanie")
+    print("2. Wyszukiwanie pojazdu po parametrach, edycja danych, usuwanie")
+    print("3. Wyszukiwanie po datach dostępności")
     print("9. Powrót do głównego menu")
 
     answer = 0
@@ -171,8 +173,67 @@ def reservation_menu():
             print('Niepoprawna wartość, spróbuj ponownie')
 
 
+def collection_reservation():
+    data = datetime.date.today()
+    correct_value = False
+    while not correct_value:
+        answer = input('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data))
+        if answer != '':
+            try:
+                data = datetime.date.fromisoformat(answer)
+                correct_value = True
+            except ValueError as e:
+                print('Niepoprawna wartość. Szczegóły: '+str(e))
+                print('Spróbuj ponownie')
+        else:
+            correct_value = True
+    reservation: Reservation = search_reservation(data)
+    rental = Rental()
+    rental.collect_reservation(reservation)
+
+
+def new_rental():
+    rental = Rental()
+    rental.add_to_database()
+    return
+
+
+def show_not_paid_rentals():
+    # rental = Rental()
+    # rental.show_not_paid_rentals_list()
+    search_unpaid_rental(datetime.date.today())
+    return
+
+
+def return_auto():
+    rental = search_rental()
+    if rental:
+        rental.return_car()
+    return
+
+
 def rental_menu():
-    pass
+    clear_terminal()
+    print('1. Odbiór rezerwacji\n2. Wypożyczenie aktualnie dostępnego pojazdu')
+    print('3. Wypożyczenia z przekroczonym czasem opłacenia\n4. Zwrot samochodu\n9. Powrót')
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer == '1':
+            collection_reservation()
+        elif answer == '2':
+            new_rental()
+            return
+        elif answer == '3':
+            show_not_paid_rentals()
+            return
+        elif answer == '4':
+            return_auto()
+            return
+        elif answer == '9':
+            return
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
 
 
 def main_menu():

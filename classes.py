@@ -1,7 +1,8 @@
 import datetime
 import os
 from terminaltables import AsciiTable
-from modelio import get_car_by_id, get_list_of_cars, get_list_of_reservations, query_to_database
+from modelio import get_car_by_id, get_list_not_paid_rentals, get_list_of_cars, get_list_of_rentals
+from modelio import query_to_database, get_list_of_reservations
 from modelio import get_list_of_id_free_cars
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError,
@@ -19,17 +20,22 @@ def clear_terminal():
 
 def change_to_car(element):
     if element[-1] == 0:
-        auto = Car(*element[1:-5], element[0])
+        auto = Car(*element[1:9], element[0])
     elif element[-1] == 1:
         auto = PassengerCar(*element[1:11], element[0])
     else:
-        auto = Van(*element[1:9], *element[11:12], element[0])
+        auto = Van(*element[1:9], *element[11:13], element[0])
     return auto
 
 
 def change_to_reservation(element):
     reservation = Reservation(*element[1:6], element[0], element[6])
     return reservation
+
+
+def change_to_rental(element):
+    rental = Rental(*element[1:9], element[0])
+    return rental
 
 
 def parameters_menu(parameters: list):
@@ -241,6 +247,60 @@ def search_reservation(data):
                 print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
         else:
             print('Niepoprawna wartość, spróbuj ponownie')
+
+
+def search_rental():
+    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
+                   'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
+                   'Numer rejestracyjny', 'Status']]
+    result = get_list_of_rentals()
+    if len(result) == 0:
+        print('Brak aktywnych wypożyczeń\nWciśnij enter')
+        input()
+        return
+    list_of_rentals = []
+    for index, element in enumerate(result, start=1):
+        rental = change_to_rental(element)
+        list_of_rentals.append(rental)
+        table_data.append([index] + rental.represent_as_row())
+    table = AsciiTable(table_data)
+    print(table.table)
+
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer.isdigit():
+            answer = int(answer)
+            if answer == 0:
+                return
+            try:
+                value_to_return = list_of_rentals[answer-1]
+                correct_value = True
+                return value_to_return
+            except IndexError:
+                print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
+
+    input()
+
+
+def search_unpaid_rental(parameters):
+    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
+                   'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
+                   'Numer\nrejestracyjny', 'status']]
+    result = get_list_not_paid_rentals(parameters)
+    if len(result) == 0:
+        print('Brak wypożyczeń z przekroczonym czasem opłacenia\nWciśnij enter')
+        input()
+        return
+    list_of_rentals = []
+    for index, element in enumerate(result, start=1):
+        rental = change_to_rental(element)
+        list_of_rentals.append(rental)
+        table_data.append([index] + rental.represent_as_row())
+    table = AsciiTable(table_data)
+    print(table.table)
 
 
 class Car:
@@ -958,6 +1018,10 @@ class Reservation:
                self.status()]
         return row
 
+    def collect(self):
+        query = f'UPDATE reservations SET status="odebrana" WHERE db_id={self._db_id}'
+        query_to_database(query)
+
     def print_as_table(self):
         table_data = [
                     ['Imię', self._name],
@@ -1139,3 +1203,264 @@ class Reservation:
                 return
             else:
                 print('Niepoprawny wybór. Spróbuj ponownie')
+
+
+class Rental:
+    def __init__(self, firstname=None, surname=None, startdate=None,
+                 enddate=None, paidtodate=None, returndate=None,
+                 auto_id=None, status=None, db_id=None):
+        self._firstname = firstname
+        self._surname = surname
+        self._startdate = startdate
+        self._enddate = enddate
+        self._paidtodate = paidtodate
+        self._returndate = returndate
+        self._auto_id = auto_id
+        self._status = status
+        self._db_id = db_id
+        if auto_id:
+            self._auto_id = auto_id
+            result = get_car_by_id(self._auto_id)
+            self.auto = change_to_car(*result)
+
+    def db_id(self):
+        return self._db_id
+
+    def firstname(self):
+        return self._firstname
+
+    def surname(self):
+        return self._surname
+
+    def startdate(self):
+        return self._startdate
+
+    def enddate(self):
+        return self._enddate
+
+    def auto_id(self):
+        return self._auto_id
+
+    def set_firstname(self, firstname):
+        firstname = firstname.title()
+        self._firstname = firstname
+
+    def set_surname(self, surname):
+        surname = surname.title()
+        self._surname = surname
+
+    def set_startdate(self, startdate):
+        self._startdate = startdate
+
+    def set_enddate(self, enddate):
+        self._enddate = enddate
+
+    def set_paidtodate(self, paidtodate):
+        self._paidtodate = paidtodate
+
+    def set_returndate(self, returndate):
+        self._returndate = returndate
+
+    def set_auto_id(self, auto_id):
+        self._auto_id = auto_id
+
+    def set_status(self, status):
+        self._status = status
+
+    def generate_insert_query(self):
+        query = 'INSERT INTO rentals (firstname, surname, startdate, enddate, '\
+                'paidtodate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'
+        query = query.format(self._firstname, self._surname, self._startdate, self._enddate,
+                             self._paidtodate, self._auto_id, self._status)
+        return query
+
+    def generate_return_query(self):
+        query = f'UPDATE rentals SET status="zwrócony" WHERE db_id={self._db_id}'
+        return query
+
+    def represent_as_row(self):
+        row = [
+                self._firstname,
+                self._surname,
+                self._startdate,
+                self._enddate,
+                self._paidtodate,
+                self._returndate if self._returndate else 'n/d',
+                self.auto.mark(),
+                self.auto.model(),
+                self.auto.registration_number(),
+                self._status
+        ]
+        return row
+
+    def print_as_table(self):
+        table_data = [
+                        ['Imię', self._firstname],
+                        ['Nazwisko', self._surname],
+                        ['Data początkowa', self._startdate],
+                        ['Data końcowa', self._enddate],
+                        ['Data opłacenia rezerwacji', self._paidtodate],
+                        ['ID auta', self._auto_id],
+                        ['Marka', self.auto.mark()],
+                        ['Model', self.auto.model()],
+                        ['Numer rejestracyjny', self.auto.registration_number()]
+        ]
+        table = AsciiTable(table_data)
+        table.title = 'Dane rezerwacji'
+        table.inner_heading_row_border = False
+        print(table.table)
+
+    def collect_reservation(self, reservation: Reservation):
+        firstname = input('Imię [{}]: '.format(reservation.name()))
+        if firstname == '':
+            self.set_firstname(reservation.name())
+        else:
+            self.set_firstname(firstname)
+        surname = input('Nazwisko [{}]: '.format(reservation.surname()))
+        if surname == '':
+            self.set_surname(reservation.surname())
+        else:
+            self.set_surname(surname)
+        correct_dates = False
+        while not correct_dates:
+            correct_value = False
+            while not correct_value:
+                startdate = input('Data początkowa [{}]: '.format(reservation.startdate()))
+                if startdate == '':
+                    self._startdate = reservation.startdate()
+                    break
+                try:
+                    startdate = datetime.date.fromisoformat(startdate)
+                    correct_value = True
+                    self._startdate = startdate
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            correct_value = False
+            while not correct_value:
+                enddate = input('Data końcowa [{}]: '.format(reservation.enddate()))
+                if enddate == '':
+                    self._enddate = reservation.enddate()
+                    break
+                try:
+                    enddate = datetime.date.fromisoformat(enddate)
+                    correct_value = True
+                    self._enddate = enddate
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            correct_value = False
+            while not correct_value:
+                paiddays = input('Opłacona ilość dni: ')
+                if paiddays.isdigit() and paiddays != '0':
+                    paiddays = int(paiddays)
+                    paiddays -= 1
+                    correct_value = True
+                    self._paidtodate = self._startdate + datetime.timedelta(days=paiddays)
+                else:
+                    print('Niepoprawna wartość, spróbuj ponownie')
+            if self._paidtodate > self._enddate:
+                print('Nie można opłacić więcej dni niż czas trwania rezerwacji, spróbuj ponownie')
+            else:
+                correct_dates = True
+        self.auto = reservation.auto
+        self._auto_id = reservation.auto_id()
+        reservation.collect()
+        self.print_as_table()
+        print('\nCzy dodać powyższe wypożyczenie? 0=Nie, 1=Tak')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer == '0':
+                print('Anulowano wypożyczenie\nNaciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                self._status = 'wypożyczony'
+                query = self.generate_insert_query()
+                query_to_database(query)
+                print('Dodano do bazy\nWciśnij enter')
+                input()
+                return
+            else:
+                print('Nieprawidłowa wartość, spróbuj ponownie')
+
+    def insert_values(self):
+        clear_terminal()
+        firstname = input('Imię: ')
+        self.set_firstname(firstname)
+        surname = input('Nazwisko: ')
+        self.set_surname(surname)
+        correct_dates = False
+        while not correct_dates:
+            correct_value = False
+            while not correct_value:
+                startdate = input('Data początkowa: ')
+                try:
+                    startdate = datetime.date.fromisoformat(startdate)
+                    correct_value = True
+                    self._startdate = startdate
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            correct_value = False
+            while not correct_value:
+                enddate = input('Data końcowa: ')
+                try:
+                    enddate = datetime.date.fromisoformat(enddate)
+                    correct_value = True
+                    self._enddate = enddate
+                except ValueError as e:
+                    print('Niepoprawna wartość. Szczegóły: '+str(e))
+                    print('Spróbuj ponownie')
+            correct_value = False
+            while not correct_value:
+                paiddays = input('Opłacona ilość dni: ')
+                if paiddays.isdigit() and paiddays != '0':
+                    paiddays = int(paiddays)
+                    paiddays -= 1
+                    correct_value = True
+                    self._paidtodate = self._startdate + datetime.timedelta(days=paiddays)
+                else:
+                    print('Niepoprawna wartość, spróbuj ponownie')
+            if self._paidtodate > self._enddate:
+                print('Nie można opłacić więcej dni niż czas trwania rezerwacji, spróbuj ponownie')
+            else:
+                correct_dates = True
+        date_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        auto = search_car(date_parameters)
+        self._auto_id = auto.db_id()
+        self.auto = auto
+
+    # def show_not_paid_rentals_list(self):
+    #     search_unpaid_rental(datetime.date.today())
+    #     print('\nNaciśnij enter')
+    #     return
+
+    def return_car(self):
+        query = self.generate_return_query()
+        query_to_database(query)
+        print('Zwrócono pojazd')
+        input()
+        return
+
+    def add_to_database(self):
+        self.insert_values()
+        self.print_as_table()
+        print('\nCzy dodać powyższe wypożyczenie? 0=Nie, 1=Tak')
+        correct_value = False
+        while not correct_value:
+            answer = input('Wybór: ')
+            if answer == '0':
+                print('Anulowano wypożyczenie\nNaciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                self._status = 'wypożyczony'
+                query = self.generate_insert_query()
+                query_to_database(query)
+                print('Dodano do bazy\nWciśnij enter')
+                input()
+                return
+            else:
+                print('Nieprawidłowa wartość, spróbuj ponownie')

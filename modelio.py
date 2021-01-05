@@ -2,8 +2,40 @@ import mysql.connector
 import json
 
 
-with open('config.txt') as file:
+try:
+    file = open('config.txt', 'r')
     config = json.load(file)
+    file.close()
+except FileNotFoundError:
+    print('Nie znaleziono pliku konfiguracyjnego.\nUtworzyć teraz? 0=Nie, 1=Tak')
+    correct_answer = False
+    while not correct_answer:
+        answer = input('Wybór: ')
+        if answer == '0':
+            print('Program nie może działać bez konfiguracji i zakończy działanie.')
+            print('Wciśnij enter')
+            input()
+            exit()
+        elif answer == '1':
+            config = dict()
+            host = input('Adres serwera: ')
+            username = input('Nazwa użytkownika: ')
+            password = input('Hasło: ')
+            database = input('Nazwa bazy danych: ')
+            config['host'] = host
+            config['username'] = username
+            config['password'] = password
+            config['database'] = database
+            file = open('config.txt', 'w')
+            json.dump(config, file, indent=4)
+            file.close()
+            correct_answer = True
+        else:
+            print('Niepoprawny wybór, spróbuj ponownie')
+except Exception:
+    print('Problem z dostępem do konfiguracji!\nProgram zakończy działanie\nWciśnij enter')
+    input()
+    exit()
 
 
 def query_to_database(query):
@@ -53,6 +85,15 @@ def get_list_of_reservations(data):
     return myresult
 
 
+def get_list_of_rentals():
+    my_db = mysql.connector.connect(**config)
+    my_cursor = my_db.cursor()
+    query = 'SELECT * FROM rentals WHERE status="wypożyczony"'
+    my_cursor.execute(query)
+    myresult = my_cursor.fetchall()
+    return myresult
+
+
 def get_car_by_id(id):
     my_db = mysql.connector.connect(**config)
     my_cursor = my_db.cursor()
@@ -81,3 +122,12 @@ def get_list_of_id_free_cars(reservation_param):
     results = my_cursor.fetchall()
     list_of_id = [int(id[0]) for id in results]
     return list_of_id
+
+
+def get_list_not_paid_rentals(date):
+    my_db = mysql.connector.connect(**config)
+    my_cursor = my_db.cursor()
+    query = f'SELECT * FROM rentals WHERE "{date}">paidtodate AND status="wypożyczony"'
+    my_cursor.execute(query)
+    results = my_cursor.fetchall()
+    return results
