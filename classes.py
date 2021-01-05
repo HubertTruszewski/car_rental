@@ -18,11 +18,13 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def input_date(input_text):
+def input_date(input_text, empty=False, defaultdate=None):
     correct_value = False
     date = None
     while not correct_value:
         date = input(input_text)
+        if empty and date == '':
+            return defaultdate
         try:
             date = datetime.date.fromisoformat(date)
             correct_value = True
@@ -30,6 +32,21 @@ def input_date(input_text):
             print('Niepoprawna wartość. Szczegóły: '+str(e))
             print('Spróbuj ponownie')
     return date
+
+
+def input_start_and_end_date(start_date_text, end_date_text, empty=False, defaultstartdate=None, defaultenddate=None):
+    correct_dates = False
+    startdate = None
+    enddate = None
+    while not correct_dates:
+        startdate = input_date(start_date_text, empty, defaultstartdate)
+        enddate = input_date(end_date_text, empty, defaultenddate)
+        if startdate > enddate:
+            print('Data końcowa nie może być wcześniej niż początkowa.')
+            print('Spróbuj ponownie')
+        else:
+            correct_dates = True
+    return startdate, enddate
 
 
 def print_table(header, content):
@@ -246,7 +263,7 @@ def search_car(reservation_param=[]):
             content.append([position] + auto.represent_as_row())
         print_table(header, content)
         print('Aby wybrać pojazd wpisz jego numer z tabeli.')
-        print('Aby zmienić parametry wyszukiwania wpisz "P"')
+        print('Aby zmienić parametry wyszukiwania wpisz "P". Powrót: wpisz "0"')
         while True:
             answer = input('Wybór: ')
             answer = answer.upper()
@@ -257,7 +274,7 @@ def search_car(reservation_param=[]):
                 answer = int(answer)
                 try:
                     if answer == 0:
-                        raise IndexError(answer)
+                        return
                     return list_of_cars[answer-1]
                 except IndexError:
                     print('Brak samochodu o takim numerze, spróbuj ponownie')
@@ -270,6 +287,10 @@ def search_reservation(data):
     header = ['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
               'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']
     result = get_list_of_reservations(data)
+    if len(result) == 0:
+        print(f'Brak rezerwacji na wskazany dzień ({data})\nWciśnij enter')
+        input()
+        return
     list_of_reservations = []
     content = []
     for index, element in enumerate(result, start=1):
@@ -1011,16 +1032,9 @@ class Reservation:
         self.set_surname(surname)
         startdate = None
         enddate = None
-        correct_values = False
-        while not correct_values:
-            startdate = input_date('Data początkowa: ')
-            enddate = input_date('Data końcowa: ')
-            if startdate > enddate:
-                print('Data końca nie może być wcześniej niż data początku. Spróbuj ponownie')
-            else:
-                correct_values = True
-                self.set_enddate(enddate)
-                self.set_startdate(startdate)
+        startdate, enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
+        self.set_enddate(enddate)
+        self.set_startdate(startdate)
         reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
         auto = search_car(reservation_parameters)
         self.auto = auto
@@ -1039,39 +1053,16 @@ class Reservation:
         enddate = self._enddate
         correct_value = False
         changed_date = False
-        while not correct_value:
-            correct_date = False
-            while not correct_date:
-                startdate = input('Data początkowa [{}]: '.format(self._startdate))
-                if startdate != '':
-                    try:
-                        self._startdate = datetime.date.fromisoformat(startdate)
-                        changed_values['startdate'] = startdate
-                        correct_date = True
-                        changed_date = True
-                    except ValueError as e:
-                        print('Nieprawidłowa wartość. Szczegóły: '+str(e))
-                else:
-                    startdate = self._startdate
-                    break
-            correct_date = False
-            while not correct_date:
-                enddate = input('Data końcowa [{}]: '.format(self._enddate))
-                if enddate != '':
-                    try:
-                        self._enddate = datetime.date.fromisoformat(enddate)
-                        changed_values['enddate'] = enddate
-                        correct_date = True
-                        changed_date = True
-                    except ValueError as e:
-                        print('Nieprawidłowa wartość. Szczegóły: '+str(e))
-                else:
-                    enddate = self._enddate
-                    break
-            if startdate > enddate:
-                print('Data końca nie może być wcześniej niż data początku. Spróbuj ponownie')
-            else:
-                correct_value = True
+        previous_dates = (self._startdate, self._enddate)
+        startdate, enddate = input_start_and_end_date('Data początkowa [{}]: '.format(self._startdate),
+                                                      'Data końcowa [{}]: '.format(self._enddate), True,
+                                                      self._startdate, self._enddate)
+        if previous_dates != (startdate, enddate):
+            changed_values['startdate'] = startdate
+            changed_values['enddate'] = enddate
+            changed_date = True
+        self._startdate = startdate
+        self._enddate = enddate
         parameters = {'startdate': startdate, 'enddate': enddate, 'res_id': self._db_id}
         reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
         list_of_id_free_cars = get_list_of_id_free_cars(parameters)
@@ -1270,33 +1261,9 @@ class Rental:
             self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            startdate = input_date('Data początkowa [{}]: '.format(reservation.startdate()))
-            correct_value = False
-            while not correct_value:
-                startdate = input('Data początkowa [{}]: '.format(reservation.startdate()))
-                if startdate == '':
-                    self._startdate = reservation.startdate()
-                    break
-                try:
-                    startdate = datetime.date.fromisoformat(startdate)
-                    correct_value = True
-                    self._startdate = startdate
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
-            correct_value = False
-            while not correct_value:
-                enddate = input('Data końcowa [{}]: '.format(reservation.enddate()))
-                if enddate == '':
-                    self._enddate = reservation.enddate()
-                    break
-                try:
-                    enddate = datetime.date.fromisoformat(enddate)
-                    correct_value = True
-                    self._enddate = enddate
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
+            self._startdate, self._enddate = input_start_and_end_date('Data początkowa [{}]: '.format(reservation.startdate()),
+                                                                      'Data końcowa [{}]: '.format(reservation.enddate()), True,
+                                                                      reservation.startdate(), reservation.enddate())
             correct_value = False
             while not correct_value:
                 paiddays = input('Opłacona ilość dni: ')
@@ -1341,8 +1308,7 @@ class Rental:
         self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            self._startdate = input_date('Data początkowa: ')
-            self._enddate = input_date('Data końcowa: ')
+            self._startdate, self._enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
             correct_value = False
             while not correct_value:
                 paiddays = input('Opłacona ilość dni: ')

@@ -1,6 +1,6 @@
 import datetime
 import os
-from classes import Car, PassengerCar, Rental, Reservation, Van, search_rental, search_reservation
+from classes import Car, PassengerCar, Rental, Reservation, Van, input_start_and_end_date, search_rental, search_reservation
 from classes import search_unpaid_rental
 from classes import search_car
 
@@ -59,6 +59,8 @@ def add_car():
 
 def display_car():
     auto = search_car()
+    if auto is None:
+        return
     clear_terminal()
     auto.print_as_table()
     print('\n1.Edytuj dane pojazdu\n2.Usuwanie pojazdu\n9.Powrót')
@@ -113,10 +115,14 @@ def manipulate_reservation():
             answer = int(answer)
             if answer == 1:
                 reservation.edit_values()
+                return
             elif answer == 2:
                 reservation.cancel_reservation()
-            else:
                 return
+            elif answer == 9:
+                return
+            else:
+                print('Niepoprawna wartość, spróbuj ponownie')
         else:
             print('Niepoprawna wartość, spróbuj ponownie')
 
@@ -144,6 +150,13 @@ def auto_menu():
             return
         elif answer == 2:
             display_car()
+            return
+        elif answer == 3:
+            clear_terminal()
+            startdate, enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
+            dates_parameteres = {'startdate': startdate, 'enddate': enddate}
+            search_car(dates_parameteres)
+            return
         elif answer == 9:
             return
         else:
@@ -234,33 +247,33 @@ def rental_menu():
 
 
 def main_menu():
-
-    answer = 0
-
-    while not answer:
+    while True:
+        answer = 0
         clear_terminal()
         print_logo()
         print_line(40)
         print_main_menu()
 
-        try:
-            answer = int(input("Wybór: "))
-        except Exception:
-            print('Niepoprawna wartość, spróbuj jeszcze raz')
-            continue
-        if answer == 1:
-            auto_menu()
-        elif answer == 2:
-            reservation_menu()
-        elif answer == 3:
-            rental_menu()
-        elif answer == 0:
-            break
-        else:
-            print("Niepoprawny wybór, spróbuj jeszcze raz:")
-            answer = 0
-        answer = 0
-        continue
+        while not answer:
+            try:
+                answer = int(input("Wybór: "))
+            except Exception:
+                print('Niepoprawna wartość, spróbuj jeszcze raz')
+                continue
+            if answer == 1:
+                auto_menu()
+                break
+            elif answer == 2:
+                reservation_menu()
+                break
+            elif answer == 3:
+                rental_menu()
+                break
+            elif answer == 0:
+                return
+            else:
+                print("Niepoprawny wybór, spróbuj jeszcze raz:")
+                answer = 0
 
 
 if __name__ == "__main__":
