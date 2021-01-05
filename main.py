@@ -1,9 +1,7 @@
 import datetime
 import os
-# from terminaltables import AsciiTable
 from classes import Car, PassengerCar, Rental, Reservation, Van, search_rental, search_reservation
 from classes import search_unpaid_rental
-# from modelio import get_list_of_cars
 from classes import search_car
 
 
@@ -199,9 +197,8 @@ def new_rental():
 
 
 def show_not_paid_rentals():
-    # rental = Rental()
-    # rental.show_not_paid_rentals_list()
     search_unpaid_rental(datetime.date.today())
+    input('\nWciśnij enter\n')
     return
 
 

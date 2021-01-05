@@ -18,6 +18,53 @@ def clear_terminal():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def input_date(input_text):
+    correct_value = False
+    date = None
+    while not correct_value:
+        date = input(input_text)
+        try:
+            date = datetime.date.fromisoformat(date)
+            correct_value = True
+        except ValueError as e:
+            print('Niepoprawna wartość. Szczegóły: '+str(e))
+            print('Spróbuj ponownie')
+    return date
+
+
+def print_table(header, content):
+    table_data = []
+    table_data.append(header)
+    table_data += content
+    table = AsciiTable(table_data)
+    print(table.table)
+
+
+def print_as_table_with_title(title, content):
+    table = AsciiTable(content)
+    table.title = title
+    table.inner_heading_row_border = False
+    print(table.table)
+
+
+def select_from_list(list):
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer.isdigit():
+            answer = int(answer)
+            if answer == 0:
+                return
+            try:
+                value_to_return = list[answer-1]
+                correct_value = True
+                return value_to_return
+            except IndexError:
+                print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
+        else:
+            print('Niepoprawna wartość, spróbuj ponownie')
+
+
 def change_to_car(element):
     if element[-1] == 0:
         auto = Car(*element[1:9], element[0])
@@ -190,15 +237,14 @@ def search_car(reservation_param=[]):
         for element in result:
             auto = change_to_car(element)
             list_of_cars.append(auto)
-        table_data = [['Lp.', 'Marka', 'Model', 'Numer\nrejestracyjny',
-                       'Liczba\nmiejsc', 'Zużycie paliwa\n[L/100km]',
-                       'Liczba\ndrzwi', 'Kolor', 'Cena', 'Nadwozie', 'Klasa',
-                       'Pojemność\n[L]', 'Drzwi\nboczne', 'Rodzaj']]
+        header = ['Lp.', 'Marka', 'Model', 'Numer\nrejestracyjny',
+                  'Liczba\nmiejsc', 'Zużycie paliwa\n[L/100km]',
+                  'Liczba\ndrzwi', 'Kolor', 'Cena', 'Nadwozie', 'Klasa',
+                  'Pojemność\n[L]', 'Drzwi\nboczne', 'Rodzaj']
+        content = []
         for position, auto in enumerate(list_of_cars, start=1):
-            row = [position] + auto.represent_as_row()
-            table_data.append(row)
-        table = AsciiTable(table_data)
-        print(table.table)
+            content.append([position] + auto.represent_as_row())
+        print_table(header, content)
         print('Aby wybrać pojazd wpisz jego numer z tabeli.')
         print('Aby zmienić parametry wyszukiwania wpisz "P"')
         while True:
@@ -221,86 +267,165 @@ def search_car(reservation_param=[]):
 
 
 def search_reservation(data):
-    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
-                   'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']]
+    header = ['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
+              'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']
     result = get_list_of_reservations(data)
     list_of_reservations = []
+    content = []
     for index, element in enumerate(result, start=1):
         reservation = change_to_reservation(element)
         list_of_reservations.append(reservation)
-        table_data.append([index] + reservation.represent_as_row())
-    table = AsciiTable(table_data)
-    print(table.table)
+        content.append([index] + reservation.represent_as_row())
+    print_table(header, content)
     print('\nAby wybrać rezerwację wpisz jej numer z listy')
-    correct_value = False
-    while not correct_value:
-        answer = input('Wybór: ')
-        if answer.isdigit():
-            answer = int(answer)
-            if answer == 0:
-                return
-            try:
-                value_to_return = list_of_reservations[answer-1]
-                correct_value = True
-                return value_to_return
-            except IndexError:
-                print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
-        else:
-            print('Niepoprawna wartość, spróbuj ponownie')
+    return select_from_list(list_of_reservations)
 
 
 def search_rental():
-    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
-                   'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
-                   'Numer rejestracyjny', 'Status']]
+    header = ['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
+              'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
+              'Numer rejestracyjny', 'Status']
     result = get_list_of_rentals()
     if len(result) == 0:
         print('Brak aktywnych wypożyczeń\nWciśnij enter')
         input()
         return
     list_of_rentals = []
+    content = []
     for index, element in enumerate(result, start=1):
         rental = change_to_rental(element)
         list_of_rentals.append(rental)
-        table_data.append([index] + rental.represent_as_row())
-    table = AsciiTable(table_data)
-    print(table.table)
-
-    correct_value = False
-    while not correct_value:
-        answer = input('Wybór: ')
-        if answer.isdigit():
-            answer = int(answer)
-            if answer == 0:
-                return
-            try:
-                value_to_return = list_of_rentals[answer-1]
-                correct_value = True
-                return value_to_return
-            except IndexError:
-                print('Nie ma takiej pozycji na liscie, spróbuj ponownie')
-        else:
-            print('Niepoprawna wartość, spróbuj ponownie')
-
-    input()
+        content.append([index] + rental.represent_as_row())
+    print_table(header, content)
+    return select_from_list(list_of_rentals)
 
 
 def search_unpaid_rental(parameters):
-    table_data = [['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
-                   'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
-                   'Numer\nrejestracyjny', 'status']]
+    header = ['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
+              'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
+              'Numer\nrejestracyjny', 'Status']
     result = get_list_not_paid_rentals(parameters)
     if len(result) == 0:
         print('Brak wypożyczeń z przekroczonym czasem opłacenia\nWciśnij enter')
         input()
         return
     list_of_rentals = []
+    content = []
     for index, element in enumerate(result, start=1):
         rental = change_to_rental(element)
         list_of_rentals.append(rental)
-        table_data.append([index] + rental.represent_as_row())
-    table = AsciiTable(table_data)
-    print(table.table)
+        content.append([index] + rental.represent_as_row())
+    print_table(header, content)
+
+
+def input_seats_value(auto, text_input, empty, changed_values=None):
+    correct_value = False
+    seats = None
+    while not correct_value:
+        seats = input(text_input)
+        if seats == '' and empty:
+            return
+        try:
+            auto.set_seats(seats)
+            correct_value = True
+        except WrongSeatsTypeError:
+            print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+        except NegativeSeatsError:
+            print('Liczba miejsc nie może być ujemna, spróbuj ponownie')
+    if changed_values is not None:
+        changed_values['seats'] = seats
+
+
+def input_fuel_consumption_value(auto, text_input, empty, changed_values=None):
+    correct_value = False
+    fuel_consumption = None
+    while not correct_value:
+        fuel_consumption = input(text_input)
+        if fuel_consumption == '' and empty:
+            return
+        try:
+            auto.set_fuel_consumption(fuel_consumption)
+            correct_value = True
+        except WrongFuelConsumptionTypeError:
+            print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+        except NegativeFuelConsumptionError:
+            print('Zużycie paliwa nie może być ujemne, spróbuj ponownie')
+    if changed_values is not None:
+        changed_values['fuel_consumption'] = fuel_consumption
+
+
+def input_doors_value(auto, text_input, empty, changed_values=None):
+    correct_value = False
+    doors = None
+    while not correct_value:
+        doors = input(text_input)
+        if doors == '' and empty:
+            return
+        try:
+            auto.set_doors(doors)
+            correct_value = True
+        except WrongDoorsTypeError:
+            print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+        except NegativeDoorsError:
+            print('Liczba drzwi nie może być ujemna')
+    if changed_values is not None:
+        changed_values['doors'] = doors
+
+
+def input_price_value(auto, text_input, empty, changed_values=None):
+    correct_value = False
+    price = None
+    while not correct_value:
+        price = input(text_input, empty)
+        if price == '' and empty:
+            return
+        try:
+            auto.set_price(price)
+            correct_value = True
+        except WrongPriceTypeError:
+            print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+        except NegativePriceError:
+            print('Cena nie może byc ujemna, spróbuj ponownie')
+    if changed_values is not None:
+        changed_values['price'] = price
+
+
+def input_capacity_value(auto, text_input, empty, changed_values=None):
+    correct_value = False
+    capacity = None
+    while not correct_value:
+        capacity = input(text_input)
+        if capacity == '' and empty:
+            return
+        try:
+            auto.set_capacity(capacity)
+            correct_value = True
+        except WrongCapacityTypeError:
+            print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
+        except NegativeCapacityError:
+            print('Pojemność nie może być ujemna, spróbuj ponownie')
+    if changed_values is not None:
+        changed_values['capacity'] = capacity
+
+
+def insert_side_door_value(self, text_input, empty, changed_values=None):
+    correct_value = False
+    side_door = None
+    while not correct_value:
+        side_door = input(text_input)
+        if side_door == '' and empty:
+            return
+        try:
+            self.set_side_door(side_door)
+            correct_value = True
+            correct_value['side_door'] = self._side_door
+        except WrongSideDoorTypeError:
+            print('Wprowadzona wartość musi być liczbą 0 lub 1,'
+                  ' spróbuj ponownie')
+        except WrongSideDoorValueError:
+            print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
+    if changed_values is not None:
+        changed_values['side_door'] = side_door
 
 
 class Car:
@@ -452,52 +577,12 @@ class Car:
         self.set_model(model)
         registration_number = input('Numer rejestracyjny: ')
         self.set_registration_number(registration_number)
-        correct_value = False
-        while not correct_value:
-            seats = input('Liczba miejsc: ')
-            try:
-                self.set_seats(seats)
-                correct_value = True
-            except WrongSeatsTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeSeatsError:
-                print('Liczba miejsc nie może być ujemna, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            fuel_consumption = input('Zużycie paliwa: ')
-            try:
-                self.set_fuel_consumption(fuel_consumption)
-                correct_value = True
-            except WrongFuelConsumptionTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeFuelConsumptionError:
-                print('Zużycie paliwa nie może być ujemne, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            doors = input('Liczba drzwi: ')
-            try:
-                self.set_doors(doors)
-                correct_value = True
-            except WrongDoorsTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeDoorsError:
-                print('Liczba drzwi nie może być ujemna')
-
+        input_seats_value(self, 'Miejsca: ', False)
+        input_fuel_consumption_value(self, 'Zużycie paliwa: ', False)
+        input_doors_value(self, 'Drzwi: ', False)
         color = input('Kolor: ')
         self.set_color(color)
-
-        correct_value = False
-        while not correct_value:
-            price = input('Cena: ')
-            try:
-                self.set_price(price)
-                correct_value = True
-            except WrongPriceTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativePriceError:
-                print('Cena nie może byc ujemna, spróbuj ponownie')
+        input_price_value(self, 'Cena: ', False)
 
     def insert_edited_values(self):
         changed_values = {}
@@ -516,69 +601,14 @@ class Car:
         if registration_number != '':
             self.set_registration_number(registration_number)
             changed_values['registration_number'] = registration_number
-
-        correct_value = False
-        while not correct_value:
-            seats = input('Liczba miejsc [{}]: '.format(self._seats))
-            if seats == '':
-                break
-            try:
-                self.set_seats(seats)
-                correct_value = True
-                changed_values['seats'] = self._seats
-            except WrongSeatsTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeSeatsError:
-                print('Liczba miejsc nie może być ujemna, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            text = 'Zużycie paliwa [{}]: '.format(self._fuel_consumption)
-            fuel_consumption = input(text)
-            if fuel_consumption == '':
-                break
-            try:
-                self.set_fuel_consumption(fuel_consumption)
-                correct_value = True
-                changed_values['fuel_consumption'] = self._fuel_consumption
-            except WrongFuelConsumptionTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeFuelConsumptionError:
-                print('Zużycie paliwa nie może być ujemne, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            doors = input('Liczba drzwi [{}]: '.format(self._doors))
-            if doors == '':
-                break
-            try:
-                self.set_doors(doors)
-                correct_value = True
-                changed_values['doors'] = self._doors
-            except WrongDoorsTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeDoorsError:
-                print('Liczba drzwi nie może być ujemna')
-
+        input_seats_value(self, 'Liczba miejsc [{}]: '.format(self._seats), True, changed_values)
+        input_fuel_consumption_value(self, 'Zużycie paliwa [{}]: '.format(self._fuel_consumption), True, changed_values)
+        input_doors_value(self, 'Drzwi [{}]: '.format(self._doors), True, changed_values)
         color = input('Kolor [{}]: '.format(self._color))
         if color != '':
             self.set_color(color)
             changed_values['color'] = self._color
-
-        correct_value = False
-        while not correct_value:
-            price = input('Cena [{}]: '.format(self._price))
-            if price == '':
-                break
-            try:
-                self.set_price(price)
-                correct_value = True
-                changed_values['price'] = self._price
-            except WrongPriceTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativePriceError:
-                print('Cena nie może byc ujemna, spróbuj ponownie')
-        return changed_values
+        input_price_value(self, 'Cena [{}]: '.format(self._price), True, changed_values)
 
     def edit_values(self):
         changed_values = self.insert_edited_values()
@@ -590,21 +620,16 @@ class Car:
         correct_value = False
         while not correct_value:
             answer = input('\nCzy zmienić dane na powyższe? 0=Nie, 1=Tak: ')
-            if answer.isdigit():
-                answer = int(answer)
-                if answer in {0, 1}:
-                    if answer == 0:
-                        print('Anulowano zmianę danych\nNaciśnij enter')
-                        input()
-                        return
-                    else:
-                        query = self.generate_set_query(changed_values)
-                        query_to_database(query)
-                        correct_value = True
-                        print('Zmieniono dane pojazdu\nNaciśnij enter')
-                        input()
-                else:
-                    print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
+            if answer == '0':
+                print('Anulowano zmianę danych\nNaciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                query = self.generate_set_query(changed_values)
+                query_to_database(query)
+                correct_value = True
+                print('Zmieniono dane pojazdu\nNaciśnij enter')
+                input()
             else:
                 print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
 
@@ -632,12 +657,8 @@ class Car:
         return rows
 
     def print_as_table(self):
-
         rows = self.rows_to_table()
-        table = AsciiTable(rows, title='Dane pojazdu')
-        table.inner_heading_row_border = False
-        table.inner_row_border = False
-        print(table.table)
+        print_as_table_with_title('Dane pojazdu', rows)
 
     def generate_insert_query(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
@@ -674,7 +695,6 @@ class Car:
                         print('Anulowano dodanie do bazy\nNaciśnij enter')
                         correct_value = True
                         input()
-                        # return
                     else:
                         query = self.generate_insert_query()
                         query_to_database(query)
@@ -690,20 +710,16 @@ class Car:
         correct_value = False
         while not correct_value:
             answer = input('Czy usunąć ten samochód z bazy? 0=Nie, 1=Tak: ')
-            if answer.isdigit():
-                answer = int(answer)
-                if answer == 0:
-                    print('Anulowano usunięcie z bazy\nWciśnij enter')
-                    input()
-                    return
-                elif answer == 1:
-                    query = self.generate_delete_query()
-                    query_to_database(query)
-                    print('Usunięto samochód z bazy\nWciśnij enter')
-                    input()
-                    return
-                else:
-                    print('Niepoprawna wartość, spróbuj ponownie')
+            if answer == '0':
+                print('Anulowano usunięcie z bazy\nWciśnij enter')
+                input()
+                return
+            elif answer == '1':
+                query = self.generate_delete_query()
+                query_to_database(query)
+                print('Usunięto samochód z bazy\nWciśnij enter')
+                input()
+                return
             else:
                 print('Niepoprawna wartość, spróbuj ponownie')
 
@@ -850,63 +866,17 @@ class Van(Car):
     def insert_edited_values(self):
         changed_values = super().insert_edited_values()
 
-        correct_value = False
-        while not correct_value:
-            capacity = input('Pojemność [{}]: '.format(self._capacity))
-            if capacity == '':
-                break
-            try:
-                self.set_capacity(capacity)
-                correct_value = True
-                changed_values['capacity'] = self._capacity
-            except WrongCapacityTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeCapacityError:
-                print('Pojemność nie może być ujemna, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            word = 'Tak' if self._side_door else 'Nie'
-            text = 'Czy posiada boczne drzwi? 0=Nie, 1=Tak [{}]: '.format(word)
-            side_door = input(text)
-            if side_door == '':
-                break
-            try:
-                self.set_side_door(side_door)
-                correct_value = True
-                correct_value['side_door'] = self._side_door
-            except WrongSideDoorTypeError:
-                print('Wprowadzona wartość musi być liczbą 0 lub 1,'
-                      ' spróbuj ponownie')
-            except WrongSideDoorValueError:
-                print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
+        input_capacity_value(self, 'Pojemność [{}]: '.format(self._capacity), True, changed_values)
+        word = 'Tak' if self._side_door else 'Nie'
+        text = 'Czy posiada boczne drzwi? 0=Nie, 1=Tak [{}]: '.format(word)
+        insert_side_door_value(self, text, True, changed_values)
 
         return changed_values
 
     def insert_values(self):
         super().insert_values()
-        correct_value = False
-        while not correct_value:
-            capacity = input('Pojemność: ')
-            try:
-                self.set_capacity(capacity)
-                correct_value = True
-            except WrongCapacityTypeError:
-                print('Wprowadzona wartość musi być liczbą, spróbuj ponownie')
-            except NegativeCapacityError:
-                print('Pojemność nie może być ujemna, spróbuj ponownie')
-
-        correct_value = False
-        while not correct_value:
-            side_door = input('Czy posiada boczne drzwi? 0=Nie, 1=Tak: ')
-            try:
-                self.set_side_door(side_door)
-                correct_value = True
-            except WrongSideDoorTypeError:
-                print('Wprowadzona wartość musi być liczbą 0 lub 1,'
-                      ' spróbuj ponownie')
-            except WrongSideDoorValueError:
-                print('Wprowadzona liczba musi być 0 lub 1, spróbuj ponownie')
+        input_capacity_value(self, 'Pojemność: ', False)
+        insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, 1=Tak: ', False)
 
     def generate_insert_query(self):
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
@@ -1032,10 +1002,7 @@ class Reservation:
                     ['Model', self.auto.model()],
                     ['Numer rejestracyjny', self.auto.registration_number()]
         ]
-        table = AsciiTable(table_data)
-        table.title = 'Dane rezerwacji'
-        table.inner_heading_row_border = False
-        print(table.table)
+        print_as_table_with_title('Dane rezerwacji', table_data)
 
     def insert_values(self):
         name = input('Imię: ')
@@ -1046,24 +1013,8 @@ class Reservation:
         enddate = None
         correct_values = False
         while not correct_values:
-            correct_date_format = False
-            while not correct_date_format:
-                startdate = input('Data początkowa: ')
-                try:
-                    startdate = datetime.date.fromisoformat(startdate)
-                    correct_date_format = True
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
-            correct_date_format = False
-            while not correct_date_format:
-                enddate = input('Data końcowa: ')
-                try:
-                    enddate = datetime.date.fromisoformat(enddate)
-                    correct_date_format = True
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
+            startdate = input_date('Data początkowa: ')
+            enddate = input_date('Data końcowa: ')
             if startdate > enddate:
                 print('Data końca nie może być wcześniej niż data początku. Spróbuj ponownie')
             else:
@@ -1285,7 +1236,7 @@ class Rental:
                 self._startdate,
                 self._enddate,
                 self._paidtodate,
-                self._returndate if self._returndate else 'n/d',
+                self._returndate if self._returndate.isoformat() != '1970-01-01' else 'n/d',
                 self.auto.mark(),
                 self.auto.model(),
                 self.auto.registration_number(),
@@ -1300,15 +1251,11 @@ class Rental:
                         ['Data początkowa', self._startdate],
                         ['Data końcowa', self._enddate],
                         ['Data opłacenia rezerwacji', self._paidtodate],
-                        ['ID auta', self._auto_id],
                         ['Marka', self.auto.mark()],
                         ['Model', self.auto.model()],
                         ['Numer rejestracyjny', self.auto.registration_number()]
         ]
-        table = AsciiTable(table_data)
-        table.title = 'Dane rezerwacji'
-        table.inner_heading_row_border = False
-        print(table.table)
+        print_as_table_with_title('Dane rezerwacji', table_data)
 
     def collect_reservation(self, reservation: Reservation):
         firstname = input('Imię [{}]: '.format(reservation.name()))
@@ -1323,6 +1270,7 @@ class Rental:
             self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
+            startdate = input_date('Data początkowa [{}]: '.format(reservation.startdate()))
             correct_value = False
             while not correct_value:
                 startdate = input('Data początkowa [{}]: '.format(reservation.startdate()))
@@ -1393,26 +1341,8 @@ class Rental:
         self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            correct_value = False
-            while not correct_value:
-                startdate = input('Data początkowa: ')
-                try:
-                    startdate = datetime.date.fromisoformat(startdate)
-                    correct_value = True
-                    self._startdate = startdate
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
-            correct_value = False
-            while not correct_value:
-                enddate = input('Data końcowa: ')
-                try:
-                    enddate = datetime.date.fromisoformat(enddate)
-                    correct_value = True
-                    self._enddate = enddate
-                except ValueError as e:
-                    print('Niepoprawna wartość. Szczegóły: '+str(e))
-                    print('Spróbuj ponownie')
+            self._startdate = input_date('Data początkowa: ')
+            self._enddate = input_date('Data końcowa: ')
             correct_value = False
             while not correct_value:
                 paiddays = input('Opłacona ilość dni: ')
@@ -1431,11 +1361,6 @@ class Rental:
         auto = search_car(date_parameters)
         self._auto_id = auto.db_id()
         self.auto = auto
-
-    # def show_not_paid_rentals_list(self):
-    #     search_unpaid_rental(datetime.date.today())
-    #     print('\nNaciśnij enter')
-    #     return
 
     def return_car(self):
         query = self.generate_return_query()
