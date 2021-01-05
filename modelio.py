@@ -55,23 +55,31 @@ except WrongConfigFileFormatError:
             correct_answer = True
         else:
             print('Niepoprawny wybór, spróbuj ponownie')
-
 except Exception:
     print('Problem z dostępem do konfiguracji!\nProgram zakończy działanie\nWciśnij enter')
     input()
     exit()
 
 
+def my_db_cursor():
+    try:
+        my_db = mysql.connector.connect(**config)
+        my_cursor = my_db.cursor()
+    except Exception:
+        print('Błąd połączenia z bazą danych!\nProgram zakończy działanie\nWciśnij enter')
+        input()
+        exit()
+    return my_db, my_cursor
+
+
 def query_to_database(query):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     my_cursor.execute(query)
     my_db.commit()
 
 
 def get_list_of_cars(parameters, reservation_param):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     if len(reservation_param) > 0:
         query = 'SELECT c.db_id, c.mark, c.model, c.registration_number, c.seats, '\
                 'c.fuel_consumption, c.doors, c.color, c.price, c.body, c.classification, '\
@@ -100,8 +108,7 @@ def get_list_of_cars(parameters, reservation_param):
 
 
 def get_list_of_reservations(data):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     query = 'SELECT r.db_id, r.firstname, r.surname, r.startdate, r.enddate, r.auto_id, '\
             'r.status FROM reservations as r WHERE r.startdate="{}"'.format(data)
     my_cursor.execute(query)
@@ -110,8 +117,7 @@ def get_list_of_reservations(data):
 
 
 def get_list_of_rentals():
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     query = 'SELECT * FROM rentals WHERE status="wypożyczony"'
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
@@ -119,8 +125,7 @@ def get_list_of_rentals():
 
 
 def get_car_by_id(id):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     query = 'SELECT * FROM cars WHERE db_id={}'.format(id)
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
@@ -128,9 +133,7 @@ def get_car_by_id(id):
 
 
 def get_list_of_id_free_cars(reservation_param):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
-
+    my_db, my_cursor = my_db_cursor()
     query = 'SELECT c.db_id, c.mark, c.model, c.registration_number, c.seats, '\
             'c.fuel_consumption, c.doors, c.color, c.price, c.body, c.classification, '\
             'c.capacity, c.side_door, c.type_id FROM cars as c '\
@@ -149,8 +152,7 @@ def get_list_of_id_free_cars(reservation_param):
 
 
 def get_list_not_paid_rentals(date):
-    my_db = mysql.connector.connect(**config)
-    my_cursor = my_db.cursor()
+    my_db, my_cursor = my_db_cursor()
     query = f'SELECT * FROM rentals WHERE "{date}">paidtodate AND status="wypożyczony"'
     my_cursor.execute(query)
     results = my_cursor.fetchall()
