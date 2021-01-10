@@ -204,7 +204,7 @@ def collection_reservation():
             print('Nie można wypożyczyć odebranej lub anulowanej rezerwacji')
             print('Spróbuj ponownie\nWciśnij enter')
             input()
-            clear_terminal()
+            return
         else:
             correct_value = True
     rental = Rental()
@@ -219,7 +219,6 @@ def new_rental():
 
 def show_not_paid_rentals():
     search_unpaid_rental(datetime.date.today())
-    input('\nWciśnij enter\n')
     return
 
 
@@ -232,7 +231,7 @@ def return_auto():
 
 def rental_menu():
     clear_terminal()
-    print('1. Odbiór rezerwacji\n2. Wypożyczenie aktualnie dostępnego pojazdu')
+    print('MENU - REZERWACJE\n1. Odbiór rezerwacji\n2. Wypożyczenie aktualnie dostępnego pojazdu')
     print('3. Wypożyczenia z przekroczonym czasem opłacenia\n4. Zwrot samochodu\n9. Powrót')
     correct_value = False
     while not correct_value:

@@ -62,11 +62,13 @@ except Exception:
 
 
 def my_db_cursor():
+    my_db = None
+    my_cursor = None
     try:
         my_db = mysql.connector.connect(**config)
         my_cursor = my_db.cursor()
-    except Exception:
-        print('Błąd połączenia z bazą danych!\nProgram zakończy działanie\nWciśnij enter')
+    except mysql.connector.Error as e:
+        print('Błąd połączenia z bazą danych! Szczegóły: ' + str(e) + '\nProgram zakończy działanie\nWciśnij enter')
         input()
         exit()
     return my_db, my_cursor
@@ -87,10 +89,10 @@ def get_list_of_cars(parameters, reservation_param):
                 'WHERE c.db_id not in (SELECT r.auto_id from '\
                 'reservations as r where r.status!="anulowana" AND ((r.startdate BETWEEN "{startdate}" '\
                 'AND "{enddate}") OR (r.enddate BETWEEN "{startdate}" AND "{enddate}") OR '\
-                '(r.startdate <= "{startdate}" AND r.enddate >= "{enddate}")) and c.db_id NOT IN '\
+                '(r.startdate <= "{startdate}" AND r.enddate >= "{enddate}"))) and c.db_id NOT IN '\
                 '(SELECT re.auto_id from rentals as re where (re.startdate BETWEEN "{startdate}" '\
                 'AND "{enddate}") OR (re.enddate BETWEEN "{startdate}" AND "{enddate}") OR '\
-                '(re.startdate <= "{startdate}" AND re.enddate >= "{enddate}")))'
+                '(re.startdate <= "{startdate}" AND re.enddate >= "{enddate}"))'
         query = query.format(**reservation_param)
     else:
         query = 'SELECT * FROM cars as c'

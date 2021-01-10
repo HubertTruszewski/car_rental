@@ -337,6 +337,8 @@ def search_unpaid_rental(parameters):
         list_of_rentals.append(rental)
         content.append([index] + rental.represent_as_row())
     print_table(header, content)
+    print('\nWciśnij enter')
+    input()
 
 
 def input_seats_value(auto, text_input, empty, changed_values=None):
@@ -938,7 +940,7 @@ class Reservation:
         if auto_id:
             self._auto_id = auto_id
             result = get_car_by_id(self._auto_id)
-            self.auto = change_to_car(*result)
+            self._auto = change_to_car(*result)
         else:
             self._auto_id = None
         if status:
@@ -966,6 +968,9 @@ class Reservation:
 
     def status(self):
         return self._status
+
+    def auto(self):
+        return self._auto
 
     def set_name(self, name):
         name = name.title()
@@ -1005,7 +1010,7 @@ class Reservation:
 
     def represent_as_row(self):
         row = [self._name, self._surname, self._startdate, self._enddate,
-               self.auto.mark(), self.auto.model(), self.auto.registration_number(),
+               self._auto.mark(), self._auto.model(), self._auto.registration_number(),
                self.status()]
         return row
 
@@ -1019,9 +1024,9 @@ class Reservation:
                     ['Nazwisko', self._surname],
                     ['Data początkowa', self._startdate],
                     ['Data końcowa', self._enddate],
-                    ['Marka samochodu', self.auto.mark()],
-                    ['Model', self.auto.model()],
-                    ['Numer rejestracyjny', self.auto.registration_number()]
+                    ['Marka samochodu', self._auto.mark()],
+                    ['Model', self._auto.model()],
+                    ['Numer rejestracyjny', self._auto.registration_number()]
         ]
         print_as_table_with_title('Dane rezerwacji', table_data)
 
@@ -1039,7 +1044,7 @@ class Reservation:
         auto = search_car(reservation_parameters)
         if auto is None:
             return 1
-        self.auto = auto
+        self._auto = auto
         self._auto_id = auto.db_id()
         self._status = 'aktywna'
 
@@ -1074,7 +1079,7 @@ class Reservation:
             input()
             auto = search_car(reservation_parameters)
             changed_auto = True
-            self.auto = auto
+            self._auto = auto
             self._auto_id = auto.db_id()
             changed_values['auto_id'] = self._auto_id
         if not changed_auto:
@@ -1086,7 +1091,7 @@ class Reservation:
                     break
                 elif answer == '1':
                     auto = search_car(reservation_parameters)
-                    self.auto = auto
+                    self._auto = auto
                     self._auto_id = auto.db_id()
                     changed_values['auto_id'] = self._auto_id
                 else:
@@ -1171,7 +1176,7 @@ class Rental:
         if auto_id:
             self._auto_id = auto_id
             result = get_car_by_id(self._auto_id)
-            self.auto = change_to_car(*result)
+            self._auto = change_to_car(*result)
 
     def db_id(self):
         return self._db_id
@@ -1190,6 +1195,9 @@ class Rental:
 
     def auto_id(self):
         return self._auto_id
+
+    def auto(self):
+        return self._auto()
 
     def set_firstname(self, firstname):
         firstname = firstname.title()
@@ -1225,7 +1233,7 @@ class Rental:
         return query
 
     def generate_return_query(self):
-        query = f'UPDATE rentals SET status="zwrócony" WHERE db_id={self._db_id}'
+        query = f'UPDATE rentals SET status="zwrócony", returndate="{datetime.date.today()}" WHERE db_id={self._db_id}'
         return query
 
     def represent_as_row(self):
@@ -1236,9 +1244,9 @@ class Rental:
                 self._enddate,
                 self._paidtodate,
                 self._returndate if self._returndate.isoformat() != '1970-01-01' else 'n/d',
-                self.auto.mark(),
-                self.auto.model(),
-                self.auto.registration_number(),
+                self._auto.mark(),
+                self._auto.model(),
+                self._auto.registration_number(),
                 self._status
         ]
         return row
@@ -1250,9 +1258,9 @@ class Rental:
                         ['Data początkowa', self._startdate],
                         ['Data końcowa', self._enddate],
                         ['Data opłacenia rezerwacji', self._paidtodate],
-                        ['Marka', self.auto.mark()],
-                        ['Model', self.auto.model()],
-                        ['Numer rejestracyjny', self.auto.registration_number()]
+                        ['Marka', self._auto.mark()],
+                        ['Model', self._auto.model()],
+                        ['Numer rejestracyjny', self._auto.registration_number()]
         ]
         print_as_table_with_title('Dane rezerwacji', table_data)
 
@@ -1286,7 +1294,7 @@ class Rental:
                 print('Nie można opłacić więcej dni niż czas trwania rezerwacji, spróbuj ponownie')
             else:
                 correct_dates = True
-        self.auto = reservation.auto
+        self._auto = reservation.auto()
         self._auto_id = reservation.auto_id()
         reservation.collect()
         self.print_as_table()
@@ -1333,10 +1341,24 @@ class Rental:
                 correct_dates = True
         date_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
         auto = search_car(date_parameters)
+        if auto is None:
+            return 1
         self._auto_id = auto.db_id()
-        self.auto = auto
+        self._auto = auto
 
     def return_car(self):
+        if self._paidtodate != datetime.date.today():
+            print('Data opłacenia jest różna od daty dzisiejszej!\nCzy kontynuować? 0=Nie, 1=Tak')
+            correct_value = False
+            while not correct_value:
+                answer = input('Wybór: ')
+                if answer == '0':
+                    return
+                elif answer == '1':
+                    correct_value = True
+                    pass
+                else:
+                    print('Niepoprawny wybór, spróbuj ponownie!')
         query = self.generate_return_query()
         query_to_database(query)
         print('Zwrócono pojazd')
@@ -1344,7 +1366,8 @@ class Rental:
         return
 
     def add_to_database(self):
-        self.insert_values()
+        if self.insert_values() == 1:
+            return
         self.print_as_table()
         print('\nCzy dodać powyższe wypożyczenie? 0=Nie, 1=Tak')
         correct_value = False
