@@ -399,7 +399,7 @@ def input_price_value(auto, text_input, empty, changed_values=None):
     correct_value = False
     price = None
     while not correct_value:
-        price = input(text_input, empty)
+        price = input(text_input)
         if price == '' and empty:
             return
         try:
