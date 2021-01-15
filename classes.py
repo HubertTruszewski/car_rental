@@ -5,7 +5,7 @@ from modelio import get_car_by_id, get_list_not_paid_rentals, get_list_of_cars, 
 from modelio import query_to_database, get_list_of_reservations
 from modelio import get_list_of_id_free_cars
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
-                    NegativeSeatsError, WrongCapacityTypeError,
+                    NegativeSeatsError, WrongCapacityTypeError, WrongDateType,
                     WrongDbIdTypeError, NegativeDbIdError,
                     WrongSeatsTypeError,
                     WrongFuelConsumptionTypeError,
@@ -15,10 +15,25 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
 
 
 def clear_terminal():
+    """Clears the terminal with proper command"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def input_true_or_false():
+    """Asks user for his answer where 0=False, 1=True and returns answer as bool"""
+    correct_value = False
+    while not correct_value:
+        answer = input('Wybór: ')
+        if answer == '0':
+            return False
+        elif answer == '1':
+            return True
+        else:
+            print('Niepoprawny wybór, spróbuj ponownie!')
+
+
 def input_date(input_text, empty=False, defaultdate=None):
+    """Asks user to input a correct date in isoformat and returns this value"""
     correct_value = False
     date = None
     while not correct_value:
@@ -35,6 +50,7 @@ def input_date(input_text, empty=False, defaultdate=None):
 
 
 def input_start_and_end_date(start_date_text, end_date_text, empty=False, defaultstartdate=None, defaultenddate=None):
+    """Ask user to input two dates in isoformat and returns value if startdate is before enddate"""
     correct_dates = False
     startdate = None
     enddate = None
@@ -50,21 +66,24 @@ def input_start_and_end_date(start_date_text, end_date_text, empty=False, defaul
 
 
 def print_table(header, content):
+    """Returns a table with given data"""
     table_data = []
     table_data.append(header)
     table_data += content
     table = AsciiTable(table_data)
-    print(table.table)
+    return table.table
 
 
 def print_as_table_with_title(title, content):
+    """Returns a table with given data and title"""
     table = AsciiTable(content)
     table.title = title
     table.inner_heading_row_border = False
-    print(table.table)
+    return table.table
 
 
 def select_from_list(list):
+    """Asks user to choose option from given list and returns value from this position"""
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')
@@ -83,6 +102,7 @@ def select_from_list(list):
 
 
 def change_to_car(element):
+    """Changes given tuple to proper type of car and returns this object"""
     if element[-1] == 0:
         auto = Car(*element[1:9], element[0])
     elif element[-1] == 1:
@@ -93,16 +113,19 @@ def change_to_car(element):
 
 
 def change_to_reservation(element):
+    """Returns a Reservation class object made from given tuple"""
     reservation = Reservation(*element[1:6], element[0], element[6])
     return reservation
 
 
 def change_to_rental(element):
+    """Returns a Rental class object made from given tuple"""
     rental = Rental(*element[1:9], element[0])
     return rental
 
 
-def parameters_menu(parameters: list):
+def parameters_menu(parameters):
+    """Parameters menu for auto where user can add, edit and delete parameters to search"""
     while True:
         clear_terminal()
         if len(parameters) == 0:
@@ -242,10 +265,10 @@ def parameters_menu(parameters: list):
                     print('Nieprawidłowa wartość, spróbuj ponownie')
             else:
                 print('Nieprawidłowa wartość, spróbuj ponownie')
-        continue
 
 
 def search_car(reservation_param=[]):
+    """Displays a table with cars, ask user to choose one and returns choosen object"""
     parameters = []
     while True:
         clear_terminal()
@@ -261,7 +284,7 @@ def search_car(reservation_param=[]):
         content = []
         for position, auto in enumerate(list_of_cars, start=1):
             content.append([position] + auto.represent_as_row())
-        print_table(header, content)
+        print(print_table(header, content))
         print('Aby wybrać pojazd wpisz jego numer z tabeli.')
         print('Aby zmienić parametry wyszukiwania wpisz "P". Powrót: wpisz "0"')
         while True:
@@ -280,10 +303,10 @@ def search_car(reservation_param=[]):
                     print('Brak samochodu o takim numerze, spróbuj ponownie')
             else:
                 print('Niepoprawna wartość, spróbuj jeszcze raz')
-        continue
 
 
 def search_reservation(data):
+    """Displays a table with reservations starting on specified date, ask user to choose one ans returns this object"""
     header = ['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
               'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']
     result = get_list_of_reservations(data)
@@ -297,7 +320,7 @@ def search_reservation(data):
         reservation = change_to_reservation(element)
         list_of_reservations.append(reservation)
         content.append([index] + reservation.represent_as_row())
-    print_table(header, content)
+    print(print_table(header, content))
     print('\nAby wybrać rezerwację wpisz jej numer z listy')
     return select_from_list(list_of_reservations)
 
@@ -317,11 +340,12 @@ def search_rental():
         rental = change_to_rental(element)
         list_of_rentals.append(rental)
         content.append([index] + rental.represent_as_row())
-    print_table(header, content)
+    print(print_table(header, content))
     return select_from_list(list_of_rentals)
 
 
 def search_unpaid_rental(parameters):
+    """Displays a table with rentals where given dates is after paidtodate"""
     header = ['Lp.', 'Imię', 'Nazwisko', 'Data początkowa', 'Data końcowa',
               'Data opłacenia', 'Data zwrotu', 'Marka', 'Model',
               'Numer\nrejestracyjny', 'Status']
@@ -336,12 +360,13 @@ def search_unpaid_rental(parameters):
         rental = change_to_rental(element)
         list_of_rentals.append(rental)
         content.append([index] + rental.represent_as_row())
-    print_table(header, content)
+    print(print_table(header, content))
     print('\nWciśnij enter')
     input()
 
 
 def input_seats_value(auto, text_input, empty, changed_values=None):
+    """Asks user to input correct seats value and returns it"""
     correct_value = False
     seats = None
     while not correct_value:
@@ -360,6 +385,7 @@ def input_seats_value(auto, text_input, empty, changed_values=None):
 
 
 def input_fuel_consumption_value(auto, text_input, empty, changed_values=None):
+    """Asks user to input correct fuel consumption value and returns it"""
     correct_value = False
     fuel_consumption = None
     while not correct_value:
@@ -378,6 +404,7 @@ def input_fuel_consumption_value(auto, text_input, empty, changed_values=None):
 
 
 def input_doors_value(auto, text_input, empty, changed_values=None):
+    """Asks user to input correct doors value and returns it"""
     correct_value = False
     doors = None
     while not correct_value:
@@ -396,6 +423,7 @@ def input_doors_value(auto, text_input, empty, changed_values=None):
 
 
 def input_price_value(auto, text_input, empty, changed_values=None):
+    """Asks user to input correct price value and returns it"""
     correct_value = False
     price = None
     while not correct_value:
@@ -414,6 +442,7 @@ def input_price_value(auto, text_input, empty, changed_values=None):
 
 
 def input_capacity_value(auto, text_input, empty, changed_values=None):
+    """Asks user to input correct capacity value and returns it"""
     correct_value = False
     capacity = None
     while not correct_value:
@@ -432,6 +461,7 @@ def input_capacity_value(auto, text_input, empty, changed_values=None):
 
 
 def insert_side_door_value(self, text_input, empty, changed_values=None):
+    """Asks user to input correct side_door value and returns it"""
     correct_value = False
     side_door = None
     while not correct_value:
@@ -455,7 +485,7 @@ class Car:
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None,
                  color=None, price=None, db_id=None):
-
+        """Constructor for Car class, by default all values are None"""
         if mark:
             self.set_mark(mark)
         else:
@@ -503,36 +533,47 @@ class Car:
         self._type_id = 0
 
     def db_id(self):
+        """Returns a database id of car"""
         return self._db_id
 
     def mark(self):
+        """Returns a mark of car"""
         return self._mark
 
     def model(self):
+        """Returns a model of car"""
         return self._model
 
     def registration_number(self):
+        """Returns a resgistration number of car"""
         return self._registration_number
 
     def seats(self):
+        """Returns a seats number of car"""
         return self._seats
 
     def fuel_consumption(self):
+        """Returns a fuel consumption of car"""
         return self._fuel_consumption
 
     def doors(self):
+        """Returns a doors number of car"""
         return self._doors
 
     def color(self):
+        """Returns a color of car"""
         return self._color
 
     def price(self):
+        """Returns a price of car"""
         return self._price
 
     def type_id(self):
+        """Returns a type id of car"""
         return self._type_id
 
     def set_db_id(self, db_id):
+        """Lets to set a database id of car"""
         try:
             db_id = int(db_id)
         except Exception:
@@ -542,18 +583,22 @@ class Car:
         self._db_id = db_id
 
     def set_mark(self, mark):
+        """Lets to set a mark of car"""
         mark = mark.title()
         self._mark = mark
 
     def set_model(self, model):
+        """Lets to set a model of car"""
         model = model.title()
         self._model = model
 
     def set_registration_number(self, registration_number):
+        """Lets to set a registration number of car"""
         registration_number = registration_number.upper()
         self._registration_number = registration_number
 
     def set_seats(self, seats):
+        """Lets to set a seats number of car"""
         try:
             seats = int(seats)
         except Exception:
@@ -563,6 +608,7 @@ class Car:
         self._seats = seats
 
     def set_fuel_consumption(self, fuel_consumption):
+        """Lets to set a fuel consumption of car"""
         try:
             fuel_consumption = float(fuel_consumption)
         except Exception:
@@ -572,6 +618,7 @@ class Car:
         self._fuel_consumption = fuel_consumption
 
     def set_doors(self, doors):
+        """Lets to set a door number of car"""
         try:
             doors = int(doors)
         except Exception:
@@ -581,10 +628,12 @@ class Car:
         self._doors = doors
 
     def set_color(self, color):
+        """Lets to set a color of car"""
         color = color.lower()
         self._color = color
 
     def set_price(self, price):
+        """Lets to set a price of car"""
         try:
             price = float(price)
         except Exception:
@@ -594,6 +643,7 @@ class Car:
         self._price = price
 
     def insert_values(self):
+        """Lets user to input attributes values of car"""
         mark = input('Marka: ')
         self.set_mark(mark)
         model = input('Model: ')
@@ -608,6 +658,7 @@ class Car:
         input_price_value(self, 'Cena: ', False)
 
     def insert_edited_values(self):
+        """Lets user to input edited attributes values of car"""
         changed_values = {}
         mark = input('Marka [{}]: '.format(self._mark))
         if mark != '':
@@ -632,31 +683,29 @@ class Car:
             self.set_color(color)
             changed_values['color'] = self._color
         input_price_value(self, 'Cena [{}]: '.format(self._price), True, changed_values)
+        return changed_values
 
     def edit_values(self):
+        """Call inset_edited_values, displays details of car and ask user to confirm editing"""
         changed_values = self.insert_edited_values()
         self.print_as_table()
         if len(changed_values) == 0:
             print('Nie zmieniono żadnych danych\nNaciśnij enter')
             input()
             return
-        correct_value = False
-        while not correct_value:
-            answer = input('\nCzy zmienić dane na powyższe? 0=Nie, 1=Tak: ')
-            if answer == '0':
-                print('Anulowano zmianę danych\nNaciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                query = self.generate_set_query(changed_values)
-                query_to_database(query)
-                correct_value = True
-                print('Zmieniono dane pojazdu\nNaciśnij enter')
-                input()
-            else:
-                print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
+        print('\nCzy zmienić dane pojazdu na powyższe? 0=Nie, 1=Tak')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano zmianę danych\nNaciśnij enter')
+            input()
+        else:
+            query = self.generate_set_query(changed_values)
+            query_to_database(query)
+            print('Zmieniono dane pojazdu\nNaciśnij enter')
+            input()
 
     def represent_as_row(self):
+        """Returns a row to display in table"""
         row = [
             self._mark, self._model,
             self._registration_number, self._seats,
@@ -667,6 +716,7 @@ class Car:
         return row
 
     def rows_to_table(self):
+        """Returns a table body with attributes values"""
         rows = [
                     ['Marka', self._mark],
                     ['Model', self._model],
@@ -680,10 +730,12 @@ class Car:
         return rows
 
     def print_as_table(self):
+        """Prints car details as table"""
         rows = self.rows_to_table()
-        print_as_table_with_title('Dane pojazdu', rows)
+        print(print_as_table_with_title('Dane pojazdu', rows))
 
     def generate_insert_query(self):
+        """Generates a INSERT query to database and returns it"""
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
                 'fuel_consumption, doors, color, price, type_id) VALUES '\
                 '("{}", "{}", "{}", {}, {}, {}, "{}", {}, {})'
@@ -694,9 +746,11 @@ class Car:
         return query
 
     def generate_delete_query(self):
+        """Generates a DELETE query to database and returns it"""
         return f'DELETE FROM cars WHERE db_id={self._db_id}'
 
-    def generate_set_query(self, values: dict):
+    def generate_set_query(self, values):
+        """Generates a SET query to database with given changes and returns it"""
         query = 'UPDATE cars SET '
         for key in values:
             value = values[key]
@@ -706,51 +760,39 @@ class Car:
         return query
 
     def add_to_database(self):
+        """Call insert_values function, displays a car as table, asks user to confirm and adds to database"""
         self.insert_values()
         self.print_as_table()
-        correct_value = False
-        while not correct_value:
-            answer = input('\nCzy dodać pojazd do bazy? 0=Nie, 1=Tak: ')
-            if answer.isdigit():
-                answer = int(answer)
-                if answer in {0, 1}:
-                    if answer == 0:
-                        print('Anulowano dodanie do bazy\nNaciśnij enter')
-                        correct_value = True
-                        input()
-                    else:
-                        query = self.generate_insert_query()
-                        query_to_database(query)
-                        correct_value = True
-                        print('Dodano samochód do bazy\nNaciśnij enter')
-                        input()
-                else:
-                    print('Dozwolone wartości to 0 lub 1, spróbuj ponownie')
-            else:
-                print('Wprowadzona wartość musi być cyfrą, spróbuj ponownie')
+        print('\nCzy dodać pojazd do bazy? 0=Nie, 1=Tak: ')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano dodanie do bazy\nNaciśnij enter')
+            input()
+        else:
+            query = self.generate_insert_query()
+            query_to_database(query)
+            print('Dodano samochód do bazy\nNaciśnij enter')
+            input()
 
     def delete_from_database(self):
-        correct_value = False
-        while not correct_value:
-            answer = input('Czy usunąć ten samochód z bazy? 0=Nie, 1=Tak: ')
-            if answer == '0':
-                print('Anulowano usunięcie z bazy\nWciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                query = self.generate_delete_query()
-                query_to_database(query)
-                print('Usunięto samochód z bazy\nWciśnij enter')
-                input()
-                return
-            else:
-                print('Niepoprawna wartość, spróbuj ponownie')
+        """Ask user to confirm deleting car and send query to database"""
+        print('Czy usunąć ten samochód z bazy? 0=Nie, 1=Tak: ')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano usunięcie z bazy\nWciśnij enter')
+            input()
+        else:
+            query = self.generate_delete_query()
+            query_to_database(query)
+            print('Usunięto samochód z bazy\nWciśnij enter')
+            input()
 
 
 class PassengerCar(Car):
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None, color=None,
                  price=None, body=None, classification=None, db_id=None):
+        """Constructor for PassengerCar class, by default all values are None"""
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
         if body:
@@ -764,20 +806,25 @@ class PassengerCar(Car):
         self._type_id = 1
 
     def body(self):
+        """Returns a body value of car"""
         return self._body
 
     def classification(self):
+        """Return a classification value of car"""
         return self._classification
 
     def set_body(self, body):
+        """Lets to set body value of PassengerCar"""
         body = body.lower()
         self._body = body
 
     def set_classification(self, classification):
+        """Lets to set classification value of PassengerCar"""
         classification = classification.upper()
         self._classification = classification
 
     def represent_as_row(self):
+        """Returns a row to represent car in table"""
         row = [
             self._mark, self._model,
             self._registration_number, self._seats,
@@ -788,6 +835,7 @@ class PassengerCar(Car):
         return row
 
     def rows_to_table(self):
+        """Returns rows to represent car as table"""
         rows = super().rows_to_table()
         rows += [
             ['Nadwozie', self._body],
@@ -796,6 +844,7 @@ class PassengerCar(Car):
         return rows
 
     def insert_edited_values(self):
+        """Lets user to input edited attributes values of car"""
         changed_values = super().insert_edited_values()
 
         body = input('Nadwozie [{}]: '.format(self._body))
@@ -811,6 +860,7 @@ class PassengerCar(Car):
         return changed_values
 
     def insert_values(self):
+        """Lets user to input attributes values of car"""
         super().insert_values()
         body = input('Nadwozie: ')
         self.set_body(body)
@@ -818,6 +868,7 @@ class PassengerCar(Car):
         self.set_classification(classification)
 
     def generate_insert_query(self):
+        """Generates a INSERT query to database and returns it"""
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
                 'fuel_consumption, doors, color, price, body, '\
                 'classification, type_id) VALUES '\
@@ -843,12 +894,15 @@ class Van(Car):
         self._type_id = 2
 
     def capacity(self):
+        """Returns a capacity value of car"""
         return self._capacity
 
     def side_door(self):
+        """Returns a side_door value of car as bool"""
         return self._side_door
 
     def set_capacity(self, capacity):
+        """Lets to set a capacity value of car"""
         try:
             capacity = float(capacity)
         except Exception:
@@ -858,6 +912,7 @@ class Van(Car):
         self._capacity = capacity
 
     def set_side_door(self, side_door):
+        """Lets to set a side_door value of car"""
         try:
             side_door = int(side_door)
         except Exception:
@@ -867,6 +922,7 @@ class Van(Car):
         self._side_door = bool(side_door)
 
     def represent_as_row(self):
+        """"Returns a row to represent car in table"""
         row = [
             self._mark, self._model,
             self._registration_number, self._seats,
@@ -879,6 +935,7 @@ class Van(Car):
         return row
 
     def rows_to_table(self):
+        """"Returns rows to represent car as table"""
         rows = super().rows_to_table()
         rows += [
             ['Pojemność', self._capacity],
@@ -887,6 +944,7 @@ class Van(Car):
         return rows
 
     def insert_edited_values(self):
+        """Lets user to input edited attributes values of car"""
         changed_values = super().insert_edited_values()
 
         input_capacity_value(self, 'Pojemność [{}]: '.format(self._capacity), True, changed_values)
@@ -897,11 +955,13 @@ class Van(Car):
         return changed_values
 
     def insert_values(self):
+        """Lets user to input attributes values of car"""
         super().insert_values()
         input_capacity_value(self, 'Pojemność: ', False)
         insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, 1=Tak: ', False)
 
     def generate_insert_query(self):
+        """Generates INSERT query to database and returns it"""
         query = 'INSERT INTO cars (mark, model, registration_number, seats, '\
                 'fuel_consumption, doors, color, price, capacity, side_door, '\
                 'type_id) VALUES '\
@@ -917,28 +977,29 @@ class Van(Car):
 class Reservation:
     def __init__(self, name=None, surname=None, startdate=None,
                  enddate=None, auto_id=None, db_id=None, status=None):
+        """Constructor of Rservation class object, by default all values are None"""
         if db_id:
-            self._db_id = db_id
+            self.set_db_id(db_id)
         else:
             self._db_id = None
         if name:
-            self._name = name
+            self.set_name(name)
         else:
             self._name = None
         if surname:
-            self._surname = surname
+            self.set_surname(surname)
         else:
             self._surname = None
         if startdate:
-            self._startdate = startdate
+            self.set_startdate(startdate)
         else:
             self._startdate = None
         if enddate:
-            self._enddate = enddate
+            self.set_enddate(enddate)
         else:
             self._enddate = None
         if auto_id:
-            self._auto_id = auto_id
+            self.set_auto_id(auto_id)
             result = get_car_by_id(self._auto_id)
             self._auto = change_to_car(*result)
         else:
@@ -949,47 +1010,81 @@ class Reservation:
             self._status = None
 
     def db_id(self):
+        """Returns a dabatase id of reservation"""
         return self._db_id
 
     def name(self):
+        """Returns a client's firstname"""
         return self._name
 
     def surname(self):
+        """Returns a client's surname"""
         return self._surname
 
     def startdate(self):
+        """Returns a startdate of reservation"""
         return self._startdate
 
     def enddate(self):
+        """Returns a enddate of reservation"""
         return self._enddate
 
     def auto_id(self):
+        """Returns an auto database id for reservation"""
         return self._auto_id
 
     def status(self):
+        """Returns status of reservation"""
         return self._status
 
     def auto(self):
+        """Returns an auto object for reservation"""
         return self._auto
 
+    def set_db_id(self, db_id):
+        """Lets to set database id for reservation"""
+        try:
+            db_id = int(db_id)
+        except ValueError:
+            raise WrongDbIdTypeError(db_id)
+        if db_id < 1:
+            raise NegativeDbIdError(db_id)
+        self._db_id = db_id
+
     def set_name(self, name):
+        """Lets to set client's firstname for reservation"""
         name = name.title()
         self._name = name
 
     def set_surname(self, surname):
+        """Lets to set client's surname for reservation"""
         surname = surname.title()
         self._surname = surname
 
     def set_startdate(self, startdate):
+        """Lets to set startdate of reservation"""
+        if type(startdate) is not datetime.date:
+            raise WrongDateType(startdate)
         self._startdate = startdate
 
     def set_enddate(self, enddate):
+        """Lets to set enddate of reservation"""
+        if type(enddate) is not datetime.date:
+            raise WrongDateType(enddate)
         self._enddate = enddate
 
     def set_auto_id(self, auto_id):
+        """Lets to set an auto database id for reservation"""
+        try:
+            auto_id = int(auto_id)
+        except ValueError:
+            raise WrongDbIdTypeError(auto_id)
+        if auto_id < 1:
+            raise NegativeDbIdError(auto_id)
         self._auto_id = auto_id
 
     def generate_insert_query(self):
+        """Returns INSERT query generated for object"""
         query = 'INSERT INTO reservations (firstname, surname, startdate, '\
                 'enddate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", {}, "{}")'
         query = query.format(self._name, self._surname, self._startdate, self._enddate,
@@ -997,40 +1092,47 @@ class Reservation:
         return query
 
     def generate_cancel_query(self):
+        """Returns query to cancel reservation in database'"""
         return f'UPDATE reservations SET status="anulowana" WHERE db_id={self._db_id}'
 
-    def generate_update_query(self, values: dict):
+    def generate_update_query(self, values):
+        """Returns UPDATE query with given changed values"""
         query = 'UPDATE reservations SET '
         for key in values:
             value = values.get(key)
             query += '{}="{}", '.format(key, value)
         query = query[:-2]
-        query += f'WHERE db_id={self._db_id}'
+        query += f' WHERE db_id={self._db_id}'
         return query
 
     def represent_as_row(self):
-        row = [self._name, self._surname, self._startdate, self._enddate,
+        """Returns a row to display in table"""
+        row = [self._name, self._surname, str(self._startdate), str(self._enddate),
                self._auto.mark(), self._auto.model(), self._auto.registration_number(),
                self.status()]
         return row
 
     def collect(self):
+        """Returns query to collect reservation in database"""
         query = f'UPDATE reservations SET status="odebrana" WHERE db_id={self._db_id}'
         query_to_database(query)
 
     def print_as_table(self):
+        """Prints reservation as table"""
         table_data = [
                     ['Imię', self._name],
                     ['Nazwisko', self._surname],
-                    ['Data początkowa', self._startdate],
-                    ['Data końcowa', self._enddate],
+                    ['Data początkowa', str(self._startdate)],
+                    ['Data końcowa', str(self._enddate)],
                     ['Marka samochodu', self._auto.mark()],
                     ['Model', self._auto.model()],
                     ['Numer rejestracyjny', self._auto.registration_number()]
         ]
-        print_as_table_with_title('Dane rezerwacji', table_data)
+        print(print_as_table_with_title('Dane rezerwacji', table_data))
+        return table_data
 
     def insert_values(self):
+        """Lets user to input reservation data"""
         name = input('Imię: ')
         self.set_name(name)
         surname = input('Nazwisko: ')
@@ -1049,6 +1151,7 @@ class Reservation:
         self._status = 'aktywna'
 
     def edit_values(self):
+        """Lets user to input edited reservation data"""
         changed_values = {}
         name = input('Imię [{}]: '.format(self._name))
         if name != '':
@@ -1058,7 +1161,6 @@ class Reservation:
             changed_values['surname'] = surname
         startdate = self._startdate
         enddate = self._enddate
-        correct_value = False
         changed_date = False
         previous_dates = (self._startdate, self._enddate)
         startdate, enddate = input_start_and_end_date('Data początkowa [{}]: '.format(self._startdate),
@@ -1074,28 +1176,24 @@ class Reservation:
         reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
         list_of_id_free_cars = get_list_of_id_free_cars(parameters)
         changed_auto = False
-        if changed_date and self._db_id not in list_of_id_free_cars:
+        if changed_date and self._auto_id not in list_of_id_free_cars:
             print("Wybrany samochód jest już zajęty w wybranym terminie. Wybierz inny: (Wciśnij enter)")
             input()
             auto = search_car(reservation_parameters)
+            if auto is None:
+                return
             changed_auto = True
             self._auto = auto
             self._auto_id = auto.db_id()
             changed_values['auto_id'] = self._auto_id
         if not changed_auto:
             print('Czy chcesz zmienić auto? 0=Nie, 1=Tak')
-            correct_value = False
-            while not correct_value:
-                answer = input('Wybór: ')
-                if answer == '0':
-                    break
-                elif answer == '1':
-                    auto = search_car(reservation_parameters)
-                    self._auto = auto
-                    self._auto_id = auto.db_id()
-                    changed_values['auto_id'] = self._auto_id
-                else:
-                    print('Niepoprawna wartość, spróbuj ponownie')
+            answer = input_true_or_false()
+            if answer:
+                auto = search_car(reservation_parameters)
+                self._auto = auto
+                self._auto_id = auto.db_id()
+                changed_values['auto_id'] = self._auto_id
         clear_terminal()
         self.print_as_table()
         if len(changed_values) == 0:
@@ -1103,129 +1201,190 @@ class Reservation:
             input()
             return
         print('Czy potwierdzasz zmianę rezerwacji? 0=Nie, 1=Tak')
-        correct_value = False
-        while not correct_value:
-            answer = input('Wybór: ')
-            if answer == '0':
-                print('Anulowano dodanie do bazy, wciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                query = self.generate_update_query(changed_values)
-                query_to_database(query)
-                print('Zmieniono rezerwację. Wciśnij enter')
-                input()
-                return
-            else:
-                print('Niepoprawna wartość, spróbuj ponownie')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano dodanie do bazy, wciśnij enter')
+            input()
+        else:
+            query = self.generate_update_query(changed_values)
+            query_to_database(query)
+            print('Zmieniono rezerwację. Wciśnij enter')
+            input()
 
     def add_to_database(self):
+        """Calls a insert_values, displays a reservation as table, asks user to confirm and adds reservation to database"""
         returned_value = self.insert_values()
         if returned_value == 1:
             return
         self.print_as_table()
         print('\nCzy dodać powyższą rezerwację do bazy? 0=Nie, 1=Tak')
-        correct_value = False
-        while not correct_value:
-            answer = input('Wybór: ')
-            if answer in {'0', '1'}:
-                answer = int(answer)
-                correct_value = True
-                if answer == 1:
-                    query = self.generate_insert_query()
-                    query_to_database(query)
-                    print('Dodano rezerwację do bazy\nWciśnij enter')
-                    input()
-                else:
-                    print('Anulowano dodanie do bazy\nWciśnij enter')
-                    input()
-            else:
-                print('Niepoprawna wartość, spróbuj ponownie')
+        answer = input_true_or_false()
+        if answer:
+            query = self.generate_insert_query()
+            query_to_database(query)
+            print('Dodano rezerwację do bazy\nWciśnij enter')
+            input()
+        else:
+            print('Anulowano dodanie do bazy\nWciśnij enter')
+            input()
 
     def cancel_reservation(self):
+        """Returns geneated cancel query to database"""
         print('Czy na pewno anulować rezerwację? 0=Nie, 1=Tak')
-        while True:
-            answer = input('Wybór: ')
-            if answer == '0':
-                print('Anulowano anulowanie rezerwacji\nNaciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                query = self.generate_cancel_query()
-                query_to_database(query)
-                print('Anulowano rezerwację\nWciśnij enter')
-                input()
-                return
-            else:
-                print('Niepoprawny wybór. Spróbuj ponownie')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano anulowanie rezerwacji\nNaciśnij enter')
+            input()
+        else:
+            query = self.generate_cancel_query()
+            query_to_database(query)
+            print('Anulowano rezerwację\nWciśnij enter')
+            input()
 
 
 class Rental:
     def __init__(self, firstname=None, surname=None, startdate=None,
                  enddate=None, paidtodate=None, returndate=None,
                  auto_id=None, status=None, db_id=None):
-        self._firstname = firstname
-        self._surname = surname
-        self._startdate = startdate
-        self._enddate = enddate
-        self._paidtodate = paidtodate
-        self._returndate = returndate
-        self._auto_id = auto_id
-        self._status = status
-        self._db_id = db_id
+        if firstname:
+            self.set_firstname(firstname)
+        else:
+            self._firstname = None
+        if surname:
+            self.set_surname(surname)
+        else:
+            self._surname = None
+        if startdate:
+            self.set_startdate(startdate)
+        else:
+            self._startdate = None
+        if enddate:
+            self.set_enddate(enddate)
+        else:
+            self._enddate = None
+        if paidtodate:
+            self.set_paidtodate(paidtodate)
+        else:
+            self._paidtodate = None
+        if returndate:
+            self.set_returndate(returndate)
+        else:
+            self._returndate = None
         if auto_id:
-            self._auto_id = auto_id
+            self.set_auto_id(auto_id)
             result = get_car_by_id(self._auto_id)
             self._auto = change_to_car(*result)
+        else:
+            self._auto_id = None
+        if status:
+            self.set_status(status)
+        else:
+            self._status = None
+        if db_id:
+            self.set_db_id(db_id)
+        else:
+            self._db_id = None
 
     def db_id(self):
+        """Returns a database id of rental"""
         return self._db_id
 
     def firstname(self):
+        """Returns a client's firstname for rental"""
         return self._firstname
 
     def surname(self):
+        """Returns a client's surname for rental"""
         return self._surname
 
     def startdate(self):
+        """Returns a startdate of rental"""
         return self._startdate
 
     def enddate(self):
+        """Returns a enddate of rental"""
         return self._enddate
 
+    def paidtodate(self):
+        """Returns a paidtodate of rental"""
+        return self._paidtodate
+
+    def returndate(self):
+        """Returns a returndate of rental"""
+        return self._returndate
+
     def auto_id(self):
+        """Returns an auto database id for rental"""
         return self._auto_id
 
     def auto(self):
-        return self._auto()
+        """Returns an auto object for rental"""
+        return self._auto
+
+    def status(self):
+        """Returns a status of rental"""
+        return self._status
+
+    def set_db_id(self, db_id):
+        """Lets to set a databse id of rental"""
+        try:
+            db_id = int(db_id)
+        except ValueError:
+            raise WrongDbIdTypeError(db_id)
+        if db_id < 1:
+            raise NegativeDbIdError(db_id)
+        self._db_id = db_id
 
     def set_firstname(self, firstname):
+        """Lets to set a client's firstname for rental"""
         firstname = firstname.title()
         self._firstname = firstname
 
     def set_surname(self, surname):
+        """Lets to set a client's surname for rental"""
         surname = surname.title()
         self._surname = surname
 
     def set_startdate(self, startdate):
+        """Lets to set a startdate of rental"""
+        if type(startdate) is not datetime.date:
+            raise WrongDateType(startdate)
         self._startdate = startdate
 
     def set_enddate(self, enddate):
+        """Lets to set a enddate of rental"""
+        if type(enddate) is not datetime.date:
+            raise WrongDateType(enddate)
         self._enddate = enddate
 
     def set_paidtodate(self, paidtodate):
+        """Lets to set a paidtodate of rental"""
+        if type(paidtodate) is not datetime.date:
+            raise WrongDateType(paidtodate)
         self._paidtodate = paidtodate
 
     def set_returndate(self, returndate):
+        """Lets to set a returndate of rental"""
+        if type(returndate) is not datetime.date:
+            raise WrongDateType(returndate)
         self._returndate = returndate
 
     def set_auto_id(self, auto_id):
+        """Lets to set a auto database id for rental"""
+        try:
+            auto_id = int(auto_id)
+        except ValueError:
+            raise WrongDbIdTypeError(auto_id)
+        if auto_id < 1:
+            raise NegativeDbIdError(auto_id)
         self._auto_id = auto_id
 
     def set_status(self, status):
+        """Lets to set a status of rental"""
         self._status = status
 
     def generate_insert_query(self):
+        """Returns generated INSERT query to databse"""
         query = 'INSERT INTO rentals (firstname, surname, startdate, enddate, '\
                 'paidtodate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'
         query = query.format(self._firstname, self._surname, self._startdate, self._enddate,
@@ -1233,17 +1392,19 @@ class Rental:
         return query
 
     def generate_return_query(self):
+        """Return generated query to return a car"""
         query = f'UPDATE rentals SET status="zwrócony", returndate="{datetime.date.today()}" WHERE db_id={self._db_id}'
         return query
 
     def represent_as_row(self):
+        """Returns a row to represent in table"""
         row = [
                 self._firstname,
                 self._surname,
-                self._startdate,
-                self._enddate,
-                self._paidtodate,
-                self._returndate if self._returndate.isoformat() != '1970-01-01' else 'n/d',
+                str(self._startdate),
+                str(self._enddate),
+                str(self._paidtodate),
+                str(self._returndate) if self._returndate.isoformat() != '1970-01-01' else 'n/d',
                 self._auto.mark(),
                 self._auto.model(),
                 self._auto.registration_number(),
@@ -1252,19 +1413,22 @@ class Rental:
         return row
 
     def print_as_table(self):
+        """Prints a rental as table"""
         table_data = [
                         ['Imię', self._firstname],
                         ['Nazwisko', self._surname],
-                        ['Data początkowa', self._startdate],
-                        ['Data końcowa', self._enddate],
-                        ['Data opłacenia rezerwacji', self._paidtodate],
+                        ['Data początkowa', str(self._startdate)],
+                        ['Data końcowa', str(self._enddate)],
+                        ['Data opłacenia rezerwacji', str(self._paidtodate)],
                         ['Marka', self._auto.mark()],
                         ['Model', self._auto.model()],
                         ['Numer rejestracyjny', self._auto.registration_number()]
         ]
-        print_as_table_with_title('Dane rezerwacji', table_data)
+        print(print_as_table_with_title('Dane rezerwacji', table_data))
+        return table_data
 
-    def collect_reservation(self, reservation: Reservation):
+    def collect_reservation(self, reservation):
+        """Lets to collect reservation and optionally edit values from reservation"""
         firstname = input('Imię [{}]: '.format(reservation.name()))
         if firstname == '':
             self.set_firstname(reservation.name())
@@ -1299,24 +1463,19 @@ class Rental:
         reservation.collect()
         self.print_as_table()
         print('\nCzy dodać powyższe wypożyczenie? 0=Nie, 1=Tak')
-        correct_value = False
-        while not correct_value:
-            answer = input('Wybór: ')
-            if answer == '0':
-                print('Anulowano wypożyczenie\nNaciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                self._status = 'wypożyczony'
-                query = self.generate_insert_query()
-                query_to_database(query)
-                print('Dodano do bazy\nWciśnij enter')
-                input()
-                return
-            else:
-                print('Nieprawidłowa wartość, spróbuj ponownie')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano wypożyczenie\nNaciśnij enter')
+            input()
+        else:
+            self._status = 'wypożyczony'
+            query = self.generate_insert_query()
+            query_to_database(query)
+            print('Dodano do bazy\nWciśnij enter')
+            input()
 
     def insert_values(self):
+        """Lets user to input rental data"""
         clear_terminal()
         firstname = input('Imię: ')
         self.set_firstname(firstname)
@@ -1347,42 +1506,36 @@ class Rental:
         self._auto = auto
 
     def return_car(self):
+        """Warns user about dirrefent datesm, asks to confirm and changes status in databse"""
         if self._paidtodate != datetime.date.today():
             print('Data opłacenia jest różna od daty dzisiejszej!\nCzy kontynuować? 0=Nie, 1=Tak')
-            correct_value = False
-            while not correct_value:
-                answer = input('Wybór: ')
-                if answer == '0':
-                    return
-                elif answer == '1':
-                    correct_value = True
-                    pass
-                else:
-                    print('Niepoprawny wybór, spróbuj ponownie!')
+            answer = input_true_or_false()
+            if not answer:
+                print('Anulowano zwrot pojazdu\nWciśnij enter')
+                return
+            print('Czy na pewno chcesz zwrócić ten pojazd? 0=Nie, 1=Tak')
+            answer = input_true_or_false()
+            if not answer:
+                print('Anulowano zwrot pojazdu\nWciśnij enter')
+                return
         query = self.generate_return_query()
         query_to_database(query)
-        print('Zwrócono pojazd')
+        print('Zwrócono pojazd\nWciśnij enter')
         input()
-        return
 
     def add_to_database(self):
+        """Call insert_values function, asks user to confirm and adds rental to database"""
         if self.insert_values() == 1:
             return
         self.print_as_table()
         print('\nCzy dodać powyższe wypożyczenie? 0=Nie, 1=Tak')
-        correct_value = False
-        while not correct_value:
-            answer = input('Wybór: ')
-            if answer == '0':
-                print('Anulowano wypożyczenie\nNaciśnij enter')
-                input()
-                return
-            elif answer == '1':
-                self._status = 'wypożyczony'
-                query = self.generate_insert_query()
-                query_to_database(query)
-                print('Dodano do bazy\nWciśnij enter')
-                input()
-                return
-            else:
-                print('Nieprawidłowa wartość, spróbuj ponownie')
+        answer = input_true_or_false()
+        if not answer:
+            print('Anulowano wypożyczenie\nNaciśnij enter')
+            input()
+        else:
+            self._status = 'wypożyczony'
+            query = self.generate_insert_query()
+            query_to_database(query)
+            print('Dodano do bazy\nWciśnij enter')
+            input()

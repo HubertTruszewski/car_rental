@@ -174,7 +174,7 @@ def auto_menu():
 def reservation_menu():
     clear_terminal()
     print('MENU - REZERWACJE')
-    print('1. Nowa rezerwacja\n2. Wyświetlenie, edycja, anulowanie rezerwacji\n3. Powrót')
+    print('1. Nowa rezerwacja\n2. Wyświetlenie, edycja, anulowanie rezerwacji\n9. Powrót')
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')

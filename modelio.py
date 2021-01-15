@@ -1,9 +1,11 @@
+from classes import clear_terminal
 from errors import WrongConfigFileFormatError
 import mysql.connector
 import json
 
 
 def setup_config_file():
+    """Create config file if not exist or is incorrect"""
     config = dict()
     host = input('Adres serwera: ')
     username = input('Nazwa użytkownika: ')
@@ -26,6 +28,7 @@ try:
     if len(config) != 4:
         raise WrongConfigFileFormatError
 except FileNotFoundError:
+    clear_terminal()
     print('Nie znaleziono pliku konfiguracyjnego.\nUtworzyć teraz? 0=Nie, 1=Tak')
     correct_answer = False
     while not correct_answer:
@@ -41,6 +44,7 @@ except FileNotFoundError:
         else:
             print('Niepoprawny wybór, spróbuj ponownie')
 except WrongConfigFileFormatError:
+    clear_terminal()
     print('Nieprawidłowy format pliku konfiguracyjnego.\nUtworzyć nowy? 0=Nie, 1=Tak')
     correct_answer = False
     while not correct_answer:
@@ -62,6 +66,7 @@ except Exception:
 
 
 def my_db_cursor():
+    """Connect to database and return a tuple: (database_object, cursor_object)"""
     my_db = None
     my_cursor = None
     try:
@@ -75,12 +80,14 @@ def my_db_cursor():
 
 
 def query_to_database(query):
+    """Send query to database which needs to be commited"""
     my_db, my_cursor = my_db_cursor()
     my_cursor.execute(query)
     my_db.commit()
 
 
 def get_list_of_cars(parameters, reservation_param):
+    """"Return a list of tuples with cars data with specified parameters"""
     my_db, my_cursor = my_db_cursor()
     if len(reservation_param) > 0:
         query = 'SELECT c.db_id, c.mark, c.model, c.registration_number, c.seats, '\
@@ -110,6 +117,7 @@ def get_list_of_cars(parameters, reservation_param):
 
 
 def get_list_of_reservations(data):
+    """Returns a list with tuples with reservations data specified by data"""
     my_db, my_cursor = my_db_cursor()
     query = 'SELECT r.db_id, r.firstname, r.surname, r.startdate, r.enddate, r.auto_id, '\
             'r.status FROM reservations as r WHERE r.startdate="{}"'.format(data)
@@ -119,6 +127,7 @@ def get_list_of_reservations(data):
 
 
 def get_list_of_rentals():
+    """Returns a list of tuples with rentals data"""
     my_db, my_cursor = my_db_cursor()
     query = 'SELECT * FROM rentals WHERE status="wypożyczony"'
     my_cursor.execute(query)
@@ -127,6 +136,7 @@ def get_list_of_rentals():
 
 
 def get_car_by_id(id):
+    """Returns a list of one tuple with car data specified by its db_id"""
     my_db, my_cursor = my_db_cursor()
     query = 'SELECT * FROM cars WHERE db_id={}'.format(id)
     my_cursor.execute(query)
@@ -135,6 +145,7 @@ def get_car_by_id(id):
 
 
 def get_list_of_id_free_cars(reservation_param):
+    """Returns a list of tuples with cars data which are free in specified dates"""
     my_db, my_cursor = my_db_cursor()
     query = 'SELECT c.db_id, c.mark, c.model, c.registration_number, c.seats, '\
             'c.fuel_consumption, c.doors, c.color, c.price, c.body, c.classification, '\
@@ -154,6 +165,7 @@ def get_list_of_id_free_cars(reservation_param):
 
 
 def get_list_not_paid_rentals(date):
+    """Returns a list of tuples with rentals data which paidtodate is before specified date"""
     my_db, my_cursor = my_db_cursor()
     query = f'SELECT * FROM rentals WHERE "{date}">paidtodate AND status="wypożyczony"'
     my_cursor.execute(query)
