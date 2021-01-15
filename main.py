@@ -1,16 +1,12 @@
 import datetime
-import os
 from classes import Car, PassengerCar, Rental, Reservation, Van, input_date, input_start_and_end_date, search_rental
-from classes import search_unpaid_rental, search_reservation
+from classes import search_unpaid_rental, search_reservation, clear_terminal
 from classes import search_car
 from modelio import query_to_database
 
 
-def clear_terminal():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
 def print_logo():
+    """Prints a logo of program"""
     print("""
    #    #     # ####### ####### #     #
   # #   #     #    #    #        #   #
@@ -22,16 +18,19 @@ def print_logo():
 
 
 def print_line(number):
+    """Prints a line with specified length"""
     print('-' * number)
 
 
 def cancel_uncollected_reservation():
+    """Cancels uncollected reservations"""
     query = 'UPDATE reservations SET status="anulowana" WHERE "{}">startdate AND status="aktywna"'
     query = query.format(datetime.date.today())
     query_to_database(query)
 
 
 def print_main_menu():
+    """Prints main menu"""
     print("Witaj w programie Autex!")
     print("Proszę wybrać jedną z dostępnych opcji")
     print("1. Auta")
@@ -41,6 +40,7 @@ def print_main_menu():
 
 
 def add_car():
+    """Calls funtions to add new car"""
     clear_terminal()
     correct_value = False
     print('Jaki typ pojazdu dodać?\n1. Samochód osobowy')
@@ -65,6 +65,7 @@ def add_car():
 
 
 def display_car():
+    """Calls functions to display, edit and delete car"""
     auto = search_car()
     if auto is None:
         return
@@ -91,25 +92,16 @@ def display_car():
 
 
 def add_reservation():
+    """Calls funtions to add reservation"""
     reservation = Reservation()
     reservation.add_to_database()
 
 
 def manipulate_reservation():
-    data = datetime.date.today()
-    correct_value = False
-    while not correct_value:
-        answer = input('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data))
-        if answer != '':
-            try:
-                data = datetime.date.fromisoformat(answer)
-                correct_value = True
-            except ValueError as e:
-                print('Niepoprawna wartość. Szczegóły: '+str(e))
-                print('Spróbuj ponownie')
-        else:
-            correct_value = True
-    reservation = search_reservation(data)
+    """Calls function to edit and cancel reservation"""
+    date = datetime.date.today()
+    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(date), True, date)
+    reservation = search_reservation(date)
     if reservation is None:
         return
     clear_terminal()
@@ -135,6 +127,7 @@ def manipulate_reservation():
 
 
 def auto_menu():
+    """Prints auto menu"""
     clear_terminal()
     print("MENU - AUTA")
     print("Proszę wybrać jedną z dostępnych opcji:")
@@ -172,6 +165,7 @@ def auto_menu():
 
 
 def reservation_menu():
+    """Prints reservation menu"""
     clear_terminal()
     print('MENU - REZERWACJE')
     print('1. Nowa rezerwacja\n2. Wyświetlenie, edycja, anulowanie rezerwacji\n9. Powrót')
@@ -192,12 +186,13 @@ def reservation_menu():
 
 
 def collection_reservation():
-    data = datetime.date.today()
-    data = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(data), True, data)
+    """Calls functions to collect reservation"""
+    date = datetime.date.today()
+    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(date), True, date)
     correct_value = False
     reservation = None
     while not correct_value:
-        reservation = search_reservation(data)
+        reservation = search_reservation(date)
         if reservation is None:
             return
         elif reservation.status() != 'aktywna':
@@ -212,17 +207,20 @@ def collection_reservation():
 
 
 def new_rental():
+    """Calls functions to add new rental"""
     rental = Rental()
     rental.add_to_database()
     return
 
 
 def show_not_paid_rentals():
+    """Displays not paid reservations as table"""
     search_unpaid_rental(datetime.date.today())
     return
 
 
 def return_auto():
+    """Calls functions to return a car"""
     rental = search_rental()
     if rental:
         rental.return_car()
@@ -230,6 +228,7 @@ def return_auto():
 
 
 def rental_menu():
+    """Prints rental menu"""
     clear_terminal()
     print('MENU - REZERWACJE\n1. Odbiór rezerwacji\n2. Wypożyczenie aktualnie dostępnego pojazdu')
     print('3. Wypożyczenia z przekroczonym czasem opłacenia\n4. Zwrot samochodu\n9. Powrót')
@@ -255,6 +254,7 @@ def rental_menu():
 
 
 def main_menu():
+    """Prints main menu"""
     while True:
         answer = 0
         clear_terminal()
