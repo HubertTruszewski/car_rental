@@ -1,7 +1,9 @@
 import datetime
 from terminaltables.ascii_table import AsciiTable
-from classes import (Car, PassengerCar, Rental, Reservation, Van, change_to_car, change_to_rental, change_to_reservation,
-                     print_as_table_with_title, print_table, select_from_list, input_date, input_true_or_false)
+from classes import (Car, PassengerCar, Rental, Reservation, Van,
+                     change_to_car, change_to_rental, change_to_reservation,
+                     print_as_table_with_title, print_table,
+                     select_from_list, input_date, input_true_or_false)
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError, WrongDateType,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -73,8 +75,8 @@ def test_select_from_list_zero(monkeypatch):
 
 
 def test_change_to_car_Car():
-    element = (1, 'Skoda', 'Octavia', 'WE54373', 3, 7.8, 5, 'czarny', 120, None, None,
-               None, None, 0)
+    element = (1, 'Skoda', 'Octavia', 'WE54373', 3, 7.8, 5,
+               'czarny', 120, None, None, None, None, 0)
     result = change_to_car(element)
     assert type(result) is Car
     assert result.db_id() == 1
@@ -83,8 +85,8 @@ def test_change_to_car_Car():
 
 
 def test_change_to_car_PassengerCar():
-    element = (1, 'Skoda', 'Octavia', 'WE54373', 3, 7.8, 5, 'czarny', 120, 'sedan', 'C',
-               None, None, 1)
+    element = (1, 'Skoda', 'Octavia', 'WE54373', 3, 7.8, 5,
+               'czarny', 120, 'sedan', 'C', None, None, 1)
     result = change_to_car(element)
     assert type(result) is PassengerCar
     assert result.db_id() == 1
@@ -95,8 +97,8 @@ def test_change_to_car_PassengerCar():
 
 
 def test_change_to_car_Van():
-    element = (1, 'Fiat', 'Doblo', 'WZ45654', 3, 7.8, 5, 'biały', 120, None, None,
-               1500, 1, 2)
+    element = (1, 'Fiat', 'Doblo', 'WZ45654', 3, 7.8, 5, 'biały', 120,
+               None, None, 1500, 1, 2)
     result = change_to_car(element)
     assert type(result) is Van
     assert result.db_id() == 1
@@ -107,11 +109,12 @@ def test_change_to_car_Van():
 
 
 def test_change_to_reservation(monkeypatch):
-    element = (3, 'Jan', 'Kowalski', datetime.date(2020, 1, 2), datetime.date(2021, 1, 5),
-               5, 'aktywna')
+    element = (3, 'Jan', 'Kowalski', datetime.date(2020, 1, 2),
+               datetime.date(2021, 1, 5), 5, 'aktywna')
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     result = change_to_reservation(element)
     assert type(result) is Reservation
@@ -124,11 +127,12 @@ def test_change_to_reservation(monkeypatch):
 
 def test_change_to_rental(monkeypatch):
     element = (1, 'Jan', 'Kowalski', datetime.date(2021, 1, 2),
-               datetime.date(2021, 1, 5), datetime.date(2021, 1, 4), datetime.date(1970, 1, 1),
-               5, 'wypożyczony')
+               datetime.date(2021, 1, 5), datetime.date(2021, 1, 4),
+               datetime.date(1970, 1, 1), 5, 'wypożyczony')
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     result = change_to_rental(element)
     assert type(result) is Rental
@@ -349,7 +353,8 @@ def test_car_generate_set_query_three_changes():
     auto = Car('Skoda', 'Octavia', 'WZ3265E', 5, 7.8, 5, 'czerwony', 200, 12)
     values = {'mark': 'Opel', 'model': 'Astra', 'color': 'czarny'}
     result = auto.generate_set_query(values)
-    query = 'UPDATE cars SET mark="Opel", model="Astra", color="czarny" WHERE db_id=12'
+    query = 'UPDATE cars SET mark="Opel", model="Astra", '\
+            'color="czarny" WHERE db_id=12'
     assert result == query
 
 
@@ -512,7 +517,8 @@ def test_van_generate_delete_query():
 def test_reservation_constructor(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 5, 6, 'aktywna')
@@ -625,12 +631,15 @@ def test_reservaion_set_auto_id_negative():
 def test_reservations_generate_insert_query(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 3, 1, "aktywna")
-    query = 'INSERT INTO reservations (firstname, surname, startdate, enddate, auto_id, status) '\
-            'VALUES ("Jan", "Kowalski", "2020-12-29", "2021-01-01", 3, "aktywna")'
+    query = 'INSERT INTO reservations (firstname, surname, startdate, '\
+            'enddate, auto_id, status) '\
+            'VALUES ("Jan", "Kowalski", "2020-12-29", '\
+            '"2021-01-01", 3, "aktywna")'
     result = reservation.generate_insert_query()
     assert result == query
 
@@ -638,7 +647,8 @@ def test_reservations_generate_insert_query(monkeypatch):
 def test_reservation_generate_canel_query(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 3, 1, "aktywna")
@@ -650,24 +660,29 @@ def test_reservation_generate_canel_query(monkeypatch):
 def test_reservation_generate_update_query(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 3, 1, "aktywna")
-    changed_values = {'firstname': 'Zbigniew', 'surname': 'Nowak', 'startdate': '2020-12-30'}
+    changed_values = {'firstname': 'Zbigniew',
+                      'surname': 'Nowak', 'startdate': '2020-12-30'}
     result = reservation.generate_update_query(changed_values)
-    query = 'UPDATE reservations SET firstname="Zbigniew", surname="Nowak", startdate="2020-12-30" WHERE db_id=1'
+    query = 'UPDATE reservations SET firstname="Zbigniew", surname="Nowak", '\
+            'startdate="2020-12-30" WHERE db_id=1'
     assert query == result
 
 
 def test_reservation_represent_as_row(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 3, 1, "aktywna")
-    row = ['Jan', 'Kowalski', '2020-12-29', '2021-01-01', 'Skoda', 'Superb', 'WE3452T', 'aktywna']
+    row = ['Jan', 'Kowalski', '2020-12-29', '2021-01-01', 'Skoda',
+           'Superb', 'WE3452T', 'aktywna']
     result = reservation.represent_as_row()
     assert row == result
 
@@ -675,7 +690,8 @@ def test_reservation_represent_as_row(monkeypatch):
 def test_reservation_print_as_table(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
     reservation = Reservation('Jan', 'Kowalski', datetime.date(2020, 12, 29),
                               datetime.date(2021, 1, 1), 3, 1, "aktywna")
@@ -695,10 +711,13 @@ def test_reservation_print_as_table(monkeypatch):
 def test_rental_constructor(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
-    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29), datetime.date(2021, 1, 1),
-                    datetime.date(2021, 1, 1), datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
+    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
     assert rental.firstname() == 'Jan'
     assert rental.surname() == 'Kowalski'
     assert rental.startdate() == datetime.date(2020, 12, 29)
@@ -822,14 +841,18 @@ def test_rental_set_auto_id_negative():
 def test_rental_generate_insert_query(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
-    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29), datetime.date(2021, 1, 1),
-                    datetime.date(2021, 1, 1), datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
+    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
     result = rental.generate_insert_query()
-    query = 'INSERT INTO rentals (firstname, surname, startdate, enddate, paidtodate, auto_id, '\
-            'status) VALUES ("Jan", "Kowalski", "2020-12-29", "2021-01-01", "2021-01-01", '\
-            '"3", "zwrócony")'
+    query = 'INSERT INTO rentals (firstname, surname, startdate, '\
+            'enddate, paidtodate, auto_id, '\
+            'status) VALUES ("Jan", "Kowalski", "2020-12-29", '\
+            '"2021-01-01", "2021-01-01", "3", "zwrócony")'
     assert result == query
 
 
@@ -842,24 +865,32 @@ def test_rental_generate_return_query(monkeypatch):
     datetime.date = NewDate
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
-    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29), datetime.date(2021, 1, 1),
-                    datetime.date(2021, 1, 1), datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
+    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
     result = rental.generate_return_query()
-    query = 'UPDATE rentals SET status="zwrócony", returndate="2021-01-01" WHERE db_id=8'
+    query = 'UPDATE rentals SET status="zwrócony", '\
+            'returndate="2021-01-01" WHERE db_id=8'
     assert query == result
 
 
 def test_rental_represent_as_row(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                 190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
-    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29), datetime.date(2021, 1, 1),
-                    datetime.date(2021, 1, 1), datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
+    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
     result = rental.represent_as_row()
-    row = ['Jan', 'Kowalski', '2020-12-29', '2021-01-01', '2021-01-01', '2021-01-01',
+    row = ['Jan', 'Kowalski', '2020-12-29', '2021-01-01',
+           '2021-01-01', '2021-01-01',
            'Skoda', 'Superb', 'WE3452T', 'zwrócony']
     assert row == result
 
@@ -867,10 +898,13 @@ def test_rental_represent_as_row(monkeypatch):
 def test_rental_print_as_table(monkeypatch):
 
     def return_auto(id):
-        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny', 190, 'sedan', 'D+', None, None, 1)]
+        return [(id, 'Skoda', 'Superb', 'WE3452T', 5, 7.6, 5, 'czarny',
+                190, 'sedan', 'D+', None, None, 1)]
     monkeypatch.setattr('classes.get_car_by_id', return_auto)
-    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29), datetime.date(2021, 1, 1),
-                    datetime.date(2021, 1, 1), datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
+    rental = Rental('Jan', 'Kowalski', datetime.date(2020, 12, 29),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1),
+                    datetime.date(2021, 1, 1), 3, 'zwrócony', 8)
     result = rental.print_as_table()
     table = [
         ['Imię', 'Jan'],

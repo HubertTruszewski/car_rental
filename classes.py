@@ -1,9 +1,8 @@
 import datetime
-import os
 from terminaltables import AsciiTable
-from modelio import get_car_by_id, get_list_not_paid_rentals, get_list_of_cars, get_list_of_rentals
-from modelio import query_to_database, get_list_of_reservations
-from modelio import get_list_of_id_free_cars
+from modelio import get_car_by_id, get_list_not_paid_rentals, get_list_of_cars
+from modelio import query_to_database, get_list_of_reservations, clear_terminal
+from modelio import get_list_of_id_free_cars, get_list_of_rentals
 from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     NegativeSeatsError, WrongCapacityTypeError, WrongDateType,
                     WrongDbIdTypeError, NegativeDbIdError,
@@ -14,13 +13,8 @@ from errors import (NegativeCapacityError, NegativeFuelConsumptionError,
                     WrongSideDoorTypeError, WrongSideDoorValueError)
 
 
-def clear_terminal():
-    """Clears the terminal with proper command"""
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-
 def input_true_or_false():
-    """Asks user for his answer where 0=False, 1=True and returns answer as bool"""
+    """Asks user for answer where 0=False, 1=True and returns answer as bool"""
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')
@@ -49,8 +43,11 @@ def input_date(input_text, empty=False, defaultdate=None):
     return date
 
 
-def input_start_and_end_date(start_date_text, end_date_text, empty=False, defaultstartdate=None, defaultenddate=None):
-    """Ask user to input two dates in isoformat and returns value if startdate is before enddate"""
+def input_start_and_end_date(start_date_text, end_date_text,
+                             empty=False, defaultstartdate=None,
+                             defaultenddate=None):
+    """Ask user to input two dates in isoformat
+    and returns values if startdate is before enddate"""
     correct_dates = False
     startdate = None
     enddate = None
@@ -83,7 +80,8 @@ def print_as_table_with_title(title, content):
 
 
 def select_from_list(list):
-    """Asks user to choose option from given list and returns value from this position"""
+    """Asks user to choose option from given list
+    and returns value from this position"""
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')
@@ -125,7 +123,8 @@ def change_to_rental(element):
 
 
 def parameters_menu(parameters):
-    """Parameters menu for auto where user can add, edit and delete parameters to search"""
+    """Parameters menu for auto where user can add,
+    edit and delete parameters to search"""
     while True:
         clear_terminal()
         if len(parameters) == 0:
@@ -166,28 +165,36 @@ def parameters_menu(parameters):
                             if param_choose == 12:
                                 print('Dozwolone wartości: 0=Nie, 1=Tak')
                             if param_choose == 13:
-                                print('Dozwolone wartości: 1=Osobowy, 2=Dostawczy, 3=Inny')
+                                print('Dozwolone wartości: 1=Osobowy, \
+                                      2=Dostawczy, 3=Inny')
                             param_value = input('Wartość parametru: ')
                             if param_choose == 1:
-                                parameters.append(('mark', 'Marka', param_value))
+                                parameters.append(('mark', 'Marka',
+                                                   param_value))
                             if param_choose == 2:
-                                parameters.append(('model', 'Model', param_value))
+                                parameters.append(('model', 'Model',
+                                                   param_value))
                             if param_choose == 3:
                                 parameters.append(('registration_number',
                                                    'Numer rejestracyjny',
                                                    param_value))
                             if param_choose == 4:
                                 parameters.append(('seats',
-                                                   'Liczba miejsc', param_value))
+                                                   'Liczba miejsc',
+                                                   param_value))
                             if param_choose == 5:
                                 parameters.append(('fuel_consumption',
-                                                   'Zużycie paliwa', param_value))
+                                                   'Zużycie paliwa',
+                                                   param_value))
                             if param_choose == 6:
-                                parameters.append(('doors', 'Drzwi', param_value))
+                                parameters.append(('doors', 'Drzwi',
+                                                   param_value))
                             if param_choose == 7:
-                                parameters.append(('color', 'Kolor', param_value))
+                                parameters.append(('color', 'Kolor',
+                                                   param_value))
                             if param_choose == 8:
-                                parameters.append(('price', 'Cena', param_value))
+                                parameters.append(('price', 'Cena',
+                                                   param_value))
                             if param_choose == 9:
                                 parameters.append(('body', 'Nadwozie',
                                                    param_value))
@@ -202,11 +209,13 @@ def parameters_menu(parameters):
                                 while not correct_param_value:
                                     if param_value in {'0', '1'}:
                                         param_value = int(param_value)
-                                        parameters.append(('side_door', 'Drzwi boczne',
+                                        parameters.append(('side_door',
+                                                           'Drzwi boczne',
                                                            param_value))
                                         correct_param_value = True
                                     else:
-                                        print('Niepoprawna wartość, spróbuj ponownie')
+                                        print('Niepoprawna wartość, \
+                                              spróbuj ponownie')
                             if param_choose == 13:
                                 correct_param_value = False
                                 while not correct_param_value:
@@ -214,10 +223,12 @@ def parameters_menu(parameters):
                                         param_value = int(param_value)
                                         if param_value == 3:
                                             param_value = 0
-                                        parameters.append(('type_id', 'Typ', param_value))
+                                        parameters.append(('type_id', 'Typ',
+                                                           param_value))
                                         correct_param_value = True
                                     else:
-                                        print('Niepoprawna wartość, spróbuj ponownie')
+                                        print('Niepoprawna wartość, \
+                                              spróbuj ponownie')
                                         param_value = input('Wybór: ')
                         break
                     else:
@@ -240,7 +251,8 @@ def parameters_menu(parameters):
                             parameters[answer-1] = (key, name, value)
                             correct_value = True
                         except IndexError:
-                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                            print('Nie ma takiej pozycji na liście, \
+                                  spróbuj ponownie')
                     break
                 elif answer == 3:
                     print('Podaj numer z listy parametru do usunięcia:')
@@ -257,7 +269,8 @@ def parameters_menu(parameters):
                             parameters.pop(answer-1)
                             correct_value = True
                         except IndexError:
-                            print('Nie ma takiej pozycji na liście, spróbuj ponownie')
+                            print('Nie ma takiej pozycji na liście, \
+                                  spróbuj ponownie')
                     break
                 elif answer == 4:
                     return
@@ -268,7 +281,8 @@ def parameters_menu(parameters):
 
 
 def search_car(reservation_param=[]):
-    """Displays a table with cars, ask user to choose one and returns choosen object"""
+    """Displays a table with cars, ask user to choose one
+    and returns choosen object"""
     parameters = []
     while True:
         clear_terminal()
@@ -286,7 +300,7 @@ def search_car(reservation_param=[]):
             content.append([position] + auto.represent_as_row())
         print(print_table(header, content))
         print('Aby wybrać pojazd wpisz jego numer z tabeli.')
-        print('Aby zmienić parametry wyszukiwania wpisz "P". Powrót: wpisz "0"')
+        print('Aby zmienić parametry wyszukiwania wpisz "P". Powrót: wpisz 0')
         while True:
             answer = input('Wybór: ')
             answer = answer.upper()
@@ -306,7 +320,8 @@ def search_car(reservation_param=[]):
 
 
 def search_reservation(data):
-    """Displays a table with reservations starting on specified date, ask user to choose one ans returns this object"""
+    """Displays a table with reservations starting on specified date,
+    ask user to choose one ans returns this object"""
     header = ['Lp.', 'Imię', 'Nazwisko', 'Data\npoczątkowa', 'Data\nkońcowa',
               'Marka', 'Model', 'Numer\nrejestracyjny', 'Status']
     result = get_list_of_reservations(data)
@@ -351,7 +366,8 @@ def search_unpaid_rental(parameters):
               'Numer\nrejestracyjny', 'Status']
     result = get_list_not_paid_rentals(parameters)
     if len(result) == 0:
-        print('Brak wypożyczeń z przekroczonym czasem opłacenia\nWciśnij enter')
+        print('Brak wypożyczeń z przekroczonym czasem opłacenia.')
+        print('Wciśnij enter')
         input()
         return
     list_of_rentals = []
@@ -482,6 +498,35 @@ def insert_side_door_value(self, text_input, empty, changed_values=None):
 
 
 class Car:
+    """"
+    Class Car. Contains attributes:
+    :param mark: mark of car
+    :type mark: str
+
+    :param model: model of car
+    :type model: str
+
+    :param registration_number: registration_number of car
+    :type registration_number: str
+
+    :param seats: amount of seats
+    :type seats: int
+
+    :param fuel_consumption: fuel consumtion for 100km in liters
+    :type fuel_consumption: float
+
+    :param doors: amount of doors
+    :type doors: int
+
+    :param color: color of car
+    :type color: str
+
+    :param price: price for one day rental
+    :type price: float
+
+    :param db_id: database id of the car
+    :type db_id: int
+    """
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None,
                  color=None, price=None, db_id=None):
@@ -675,18 +720,24 @@ class Car:
         if registration_number != '':
             self.set_registration_number(registration_number)
             changed_values['registration_number'] = registration_number
-        input_seats_value(self, 'Liczba miejsc [{}]: '.format(self._seats), True, changed_values)
-        input_fuel_consumption_value(self, 'Zużycie paliwa [{}]: '.format(self._fuel_consumption), True, changed_values)
-        input_doors_value(self, 'Drzwi [{}]: '.format(self._doors), True, changed_values)
+        input_seats_value(self, 'Liczba miejsc [{}]: '.format(self._seats),
+                          True, changed_values)
+        input_fuel_consumption_value(self, 'Zużycie paliwa [{}]: \
+                                           '.format(self._fuel_consumption),
+                                     True, changed_values)
+        input_doors_value(self, 'Drzwi [{}]: '.format(self._doors),
+                          True, changed_values)
         color = input('Kolor [{}]: '.format(self._color))
         if color != '':
             self.set_color(color)
             changed_values['color'] = self._color
-        input_price_value(self, 'Cena [{}]: '.format(self._price), True, changed_values)
+        input_price_value(self, 'Cena [{}]: '.format(self._price),
+                          True, changed_values)
         return changed_values
 
     def edit_values(self):
-        """Call inset_edited_values, displays details of car and ask user to confirm editing"""
+        """Call inset_edited_values, displays details of car
+        and ask user to confirm editing"""
         changed_values = self.insert_edited_values()
         self.print_as_table()
         if len(changed_values) == 0:
@@ -750,7 +801,7 @@ class Car:
         return f'DELETE FROM cars WHERE db_id={self._db_id}'
 
     def generate_set_query(self, values):
-        """Generates a SET query to database with given changes and returns it"""
+        """Generates a SET query to db with given changes and returns it"""
         query = 'UPDATE cars SET '
         for key in values:
             value = values[key]
@@ -760,7 +811,8 @@ class Car:
         return query
 
     def add_to_database(self):
-        """Call insert_values function, displays a car as table, asks user to confirm and adds to database"""
+        """Call insert_values function, displays a car as table,
+        asks user to confirm and adds to database"""
         self.insert_values()
         self.print_as_table()
         print('\nCzy dodać pojazd do bazy? 0=Nie, 1=Tak: ')
@@ -789,10 +841,45 @@ class Car:
 
 
 class PassengerCar(Car):
+    """
+    Class Car. Inherits from Car. Contains attributes:
+    :param mark: mark of car
+    :type mark: str
+
+    :param model: model of car
+    :type model: str
+
+    :param registration_number: registration_number of car
+    :type registration_number: str
+
+    :param seats: amount of seats
+    :type seats: int
+
+    :param fuel_consumption: fuel consumtion for 100km in liters
+    :type fuel_consumption: float
+
+    :param doors: amount of doors
+    :type doors: int
+
+    :param color: color of car
+    :type color: str
+
+    :param price: price for one day rental
+    :type price: float
+
+    :param db_id: database id of the car
+    :type db_id: int
+
+    :param body: body type of car
+    :type body: str
+
+    :param classfication: classification of car
+    :type classification: str
+    """
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None, color=None,
                  price=None, body=None, classification=None, db_id=None):
-        """Constructor for PassengerCar class, by default all values are None"""
+        """Constructor for PassengerCar class, default all values are None"""
         super().__init__(mark, model, registration_number, seats,
                          fuel_consumption, doors, color, price, db_id)
         if body:
@@ -883,6 +970,41 @@ class PassengerCar(Car):
 
 
 class Van(Car):
+    """
+    Class Van. Inherits from Car. Caontains attributes:
+    :param mark: mark of car
+    :type mark: str
+
+    :param model: model of car
+    :type model: str
+
+    :param registration_number: registration_number of car
+    :type registration_number: str
+
+    :param seats: amount of seats
+    :type seats: int
+
+    :param fuel_consumption: fuel consumtion for 100km in liters
+    :type fuel_consumption: float
+
+    :param doors: amount of doors
+    :type doors: int
+
+    :param color: color of car
+    :type color: str
+
+    :param price: price for one day rental
+    :type price: float
+
+    :param db_id: database id of the car
+    :type db_id: int
+
+    :param capacity: capacity in liters of car
+    :type capacity: float
+
+    :param side_door: if the car has a side door
+    :type side_door: bool
+    """
     def __init__(self, mark=None, model=None, registration_number=None,
                  seats=None, fuel_consumption=None, doors=None,
                  color=None, price=None, capacity=None,
@@ -947,7 +1069,8 @@ class Van(Car):
         """Lets user to input edited attributes values of car"""
         changed_values = super().insert_edited_values()
 
-        input_capacity_value(self, 'Pojemność [{}]: '.format(self._capacity), True, changed_values)
+        input_capacity_value(self, 'Pojemność [{}]: '.format(self._capacity),
+                             True, changed_values)
         word = 'Tak' if self._side_door else 'Nie'
         text = 'Czy posiada boczne drzwi? 0=Nie, 1=Tak [{}]: '.format(word)
         insert_side_door_value(self, text, True, changed_values)
@@ -958,7 +1081,8 @@ class Van(Car):
         """Lets user to input attributes values of car"""
         super().insert_values()
         input_capacity_value(self, 'Pojemność: ', False)
-        insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, 1=Tak: ', False)
+        insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, \
+                                      1=Tak: ', False)
 
     def generate_insert_query(self):
         """Generates INSERT query to database and returns it"""
@@ -975,9 +1099,38 @@ class Van(Car):
 
 
 class Reservation:
+    """
+    Class Reservation. Contains attributes:
+
+    :param name: client's firstname
+    :type name: str
+
+    :param surname: cliens's surname
+    :type surname: str
+
+    :param startdate: first day of reservation
+    :type startdate: datetime.date
+
+    :param enddate: last day of reservation
+    :type enddate: datetime.date
+
+    :param auto_id: db_id of reserved car
+    :type auto_id: int
+
+    :param auto: auto object for reservation
+    :type auto: Car, PassengerCar, Van
+
+    :param db_id: database id of reservation
+    :type db_id: int
+
+    :param status: status of reservation
+    :type status: str
+    :values status: aktywna, anulowana, odebrana
+    """
     def __init__(self, name=None, surname=None, startdate=None,
                  enddate=None, auto_id=None, db_id=None, status=None):
-        """Constructor of Rservation class object, by default all values are None"""
+        """Constructor of Rservation class object,
+        default all values are None"""
         if db_id:
             self.set_db_id(db_id)
         else:
@@ -1086,14 +1239,16 @@ class Reservation:
     def generate_insert_query(self):
         """Returns INSERT query generated for object"""
         query = 'INSERT INTO reservations (firstname, surname, startdate, '\
-                'enddate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", {}, "{}")'
-        query = query.format(self._name, self._surname, self._startdate, self._enddate,
-                             self._auto_id, self._status)
+                'enddate, auto_id, status) VALUES '\
+                '("{}", "{}", "{}", "{}", {}, "{}")'
+        query = query.format(self._name, self._surname, self._startdate,
+                             self._enddate, self._auto_id, self._status)
         return query
 
     def generate_cancel_query(self):
         """Returns query to cancel reservation in database'"""
-        return f'UPDATE reservations SET status="anulowana" WHERE db_id={self._db_id}'
+        return f'UPDATE reservations SET status="anulowana" '\
+               f'WHERE db_id={self._db_id}'
 
     def generate_update_query(self, values):
         """Returns UPDATE query with given changed values"""
@@ -1107,14 +1262,16 @@ class Reservation:
 
     def represent_as_row(self):
         """Returns a row to display in table"""
-        row = [self._name, self._surname, str(self._startdate), str(self._enddate),
-               self._auto.mark(), self._auto.model(), self._auto.registration_number(),
+        row = [self._name, self._surname, str(self._startdate),
+               str(self._enddate), self._auto.mark(),
+               self._auto.model(), self._auto.registration_number(),
                self.status()]
         return row
 
     def collect(self):
         """Returns query to collect reservation in database"""
-        query = f'UPDATE reservations SET status="odebrana" WHERE db_id={self._db_id}'
+        query = f'UPDATE reservations SET status="odebrana" \
+                  WHERE db_id={self._db_id}'
         query_to_database(query)
 
     def print_as_table(self):
@@ -1139,10 +1296,12 @@ class Reservation:
         self.set_surname(surname)
         startdate = None
         enddate = None
-        startdate, enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
+        startdate, enddate = input_start_and_end_date('Data początkowa: ',
+                                                      'Data końcowa: ')
         self.set_enddate(enddate)
         self.set_startdate(startdate)
-        reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        reservation_parameters = {'startdate': self._startdate,
+                                  'enddate': self._enddate}
         auto = search_car(reservation_parameters)
         if auto is None:
             return 1
@@ -1163,21 +1322,27 @@ class Reservation:
         enddate = self._enddate
         changed_date = False
         previous_dates = (self._startdate, self._enddate)
-        startdate, enddate = input_start_and_end_date('Data początkowa [{}]: '.format(self._startdate),
-                                                      'Data końcowa [{}]: '.format(self._enddate), True,
-                                                      self._startdate, self._enddate)
+        startdate, enddate = input_start_and_end_date('Data początkowa [{}]: '
+                                                      .format(self._startdate),
+                                                      'Data końcowa [{}]: '
+                                                      .format(self._enddate),
+                                                      True, self._startdate,
+                                                      self._enddate)
         if previous_dates != (startdate, enddate):
             changed_values['startdate'] = startdate
             changed_values['enddate'] = enddate
             changed_date = True
         self._startdate = startdate
         self._enddate = enddate
-        parameters = {'startdate': startdate, 'enddate': enddate, 'res_id': self._db_id}
-        reservation_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        parameters = {'startdate': startdate, 'enddate': enddate,
+                      'res_id': self._db_id}
+        reservation_parameters = {'startdate': self._startdate,
+                                  'enddate': self._enddate}
         list_of_id_free_cars = get_list_of_id_free_cars(parameters)
         changed_auto = False
         if changed_date and self._auto_id not in list_of_id_free_cars:
-            print("Wybrany samochód jest już zajęty w wybranym terminie. Wybierz inny: (Wciśnij enter)")
+            print("Wybrany samochód jest już zajęty w wybranym terminie.")
+            print(" Wybierz inny: (Wciśnij enter)")
             input()
             auto = search_car(reservation_parameters)
             if auto is None:
@@ -1212,7 +1377,8 @@ class Reservation:
             input()
 
     def add_to_database(self):
-        """Calls a insert_values, displays a reservation as table, asks user to confirm and adds reservation to database"""
+        """Calls a insert_values, displays a reservation as table,
+        asks user to confirm and adds reservation to database"""
         returned_value = self.insert_values()
         if returned_value == 1:
             return
@@ -1243,6 +1409,40 @@ class Reservation:
 
 
 class Rental:
+    """
+    Class Rental. Contains attributes:
+
+    :param firstname: client's firstname
+    :type firstname: str
+
+    :param surname: cliens's surname
+    :type surname: str
+
+    :param startdate: first day of rental
+    :type startdate: datetime.date
+
+    :param enddate: last day of rental
+    :type enddate: datetime.date
+
+    :param paidtodate: last paid day of rental
+    :type paidtodate: datetime.date
+
+    :param returndate: day of return car
+    :type returndate: datetime.date
+
+    :param auto_id: db_id of reserved car
+    :type auto_id: int
+
+    :param auto: auto object for rental
+    :type auto: Car, PassengerCar, Van
+
+    :param db_id: database id of reservation
+    :type db_id: int
+
+    :param status: status of reservation
+    :type status: str
+    :values status: aktywna, anulowana, odebrana
+    """
     def __init__(self, firstname=None, surname=None, startdate=None,
                  enddate=None, paidtodate=None, returndate=None,
                  auto_id=None, status=None, db_id=None):
@@ -1385,15 +1585,19 @@ class Rental:
 
     def generate_insert_query(self):
         """Returns generated INSERT query to databse"""
-        query = 'INSERT INTO rentals (firstname, surname, startdate, enddate, '\
-                'paidtodate, auto_id, status) VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'
-        query = query.format(self._firstname, self._surname, self._startdate, self._enddate,
+        query = 'INSERT INTO rentals (firstname, surname, startdate, '\
+                'enddate, paidtodate, auto_id, status) '\
+                'VALUES ("{}", "{}", "{}", "{}", "{}", "{}", "{}")'
+        query = query.format(self._firstname, self._surname,
+                             self._startdate, self._enddate,
                              self._paidtodate, self._auto_id, self._status)
         return query
 
     def generate_return_query(self):
         """Return generated query to return a car"""
-        query = f'UPDATE rentals SET status="zwrócony", returndate="{datetime.date.today()}" WHERE db_id={self._db_id}'
+        date = datetime.date.today()
+        query = f'UPDATE rentals SET status="zwrócony", '\
+                f'returndate="{date}" WHERE db_id={self._db_id}'
         return query
 
     def represent_as_row(self):
@@ -1404,7 +1608,8 @@ class Rental:
                 str(self._startdate),
                 str(self._enddate),
                 str(self._paidtodate),
-                str(self._returndate) if self._returndate.isoformat() != '1970-01-01' else 'n/d',
+                str(self._returndate) if self._returndate.isoformat() !=
+                '1970-01-01' else 'n/d',
                 self._auto.mark(),
                 self._auto.model(),
                 self._auto.registration_number(),
@@ -1422,13 +1627,15 @@ class Rental:
                         ['Data opłacenia rezerwacji', str(self._paidtodate)],
                         ['Marka', self._auto.mark()],
                         ['Model', self._auto.model()],
-                        ['Numer rejestracyjny', self._auto.registration_number()]
+                        ['Numer rejestracyjny',
+                         self._auto.registration_number()]
         ]
         print(print_as_table_with_title('Dane rezerwacji', table_data))
         return table_data
 
     def collect_reservation(self, reservation):
-        """Lets to collect reservation and optionally edit values from reservation"""
+        """Lets to collect reservation
+        and optionally edit values from reservation"""
         firstname = input('Imię [{}]: '.format(reservation.name()))
         if firstname == '':
             self.set_firstname(reservation.name())
@@ -1441,9 +1648,14 @@ class Rental:
             self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            self._startdate, self._enddate = input_start_and_end_date('Data początkowa [{}]: '.format(reservation.startdate()),
-                                                                      'Data końcowa [{}]: '.format(reservation.enddate()), True,
-                                                                      reservation.startdate(), reservation.enddate())
+            startdate = reservation.startdate()
+            enddate = reservation.enddate()
+            self._startdate,
+            self._enddate = input_start_and_end_date('Data początkowa [{}]: '
+                                                     .format(startdate),
+                                                     'Data końcowa [{}]: '
+                                                     .format(enddate), True,
+                                                     startdate, enddate)
             correct_value = False
             while not correct_value:
                 paiddays = input('Opłacona ilość dni: ')
@@ -1451,11 +1663,13 @@ class Rental:
                     paiddays = int(paiddays)
                     paiddays -= 1
                     correct_value = True
-                    self._paidtodate = self._startdate + datetime.timedelta(days=paiddays)
+                    date_delta = datetime.timedelta(days=paiddays)
+                    self._paidtodate = self._startdate + date_delta
                 else:
                     print('Niepoprawna wartość, spróbuj ponownie')
             if self._paidtodate > self._enddate:
-                print('Nie można opłacić więcej dni niż czas trwania rezerwacji, spróbuj ponownie')
+                print('Nie można opłacić więcej dni niż czas trwania \
+                      wypożyczenia, spróbuj ponownie')
             else:
                 correct_dates = True
         self._auto = reservation.auto()
@@ -1483,7 +1697,9 @@ class Rental:
         self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            self._startdate, self._enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
+            self._startdate,
+            self._enddate = input_start_and_end_date('Data początkowa: ',
+                                                     'Data końcowa: ')
             correct_value = False
             while not correct_value:
                 paiddays = input('Opłacona ilość dni: ')
@@ -1491,14 +1707,17 @@ class Rental:
                     paiddays = int(paiddays)
                     paiddays -= 1
                     correct_value = True
-                    self._paidtodate = self._startdate + datetime.timedelta(days=paiddays)
+                    date_delta = datetime.timedelta(days=paiddays)
+                    self._paidtodate = self._startdate + date_delta
                 else:
                     print('Niepoprawna wartość, spróbuj ponownie')
             if self._paidtodate > self._enddate:
-                print('Nie można opłacić więcej dni niż czas trwania rezerwacji, spróbuj ponownie')
+                print('Nie można opłacić więcej dni niż czas trwania \
+                       rezerwacji, spróbuj ponownie')
             else:
                 correct_dates = True
-        date_parameters = {'startdate': self._startdate, 'enddate': self._enddate}
+        date_parameters = {'startdate': self._startdate,
+                           'enddate': self._enddate}
         auto = search_car(date_parameters)
         if auto is None:
             return 1
@@ -1506,9 +1725,11 @@ class Rental:
         self._auto = auto
 
     def return_car(self):
-        """Warns user about dirrefent datesm, asks to confirm and changes status in databse"""
+        """Warns user about dirrefent datesm, asks to confirm
+        and changes status in databse"""
         if self._paidtodate != datetime.date.today():
-            print('Data opłacenia jest różna od daty dzisiejszej!\nCzy kontynuować? 0=Nie, 1=Tak')
+            print('Data opłacenia jest różna od daty dzisiejszej!')
+            print('Czy kontynuować? 0=Nie, 1=Tak')
             answer = input_true_or_false()
             if not answer:
                 print('Anulowano zwrot pojazdu\nWciśnij enter')
@@ -1524,7 +1745,8 @@ class Rental:
         input()
 
     def add_to_database(self):
-        """Call insert_values function, asks user to confirm and adds rental to database"""
+        """Call insert_values function,
+        asks user to confirm and adds rental to database"""
         if self.insert_values() == 1:
             return
         self.print_as_table()

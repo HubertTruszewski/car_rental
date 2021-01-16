@@ -1,8 +1,9 @@
 import datetime
-from classes import Car, PassengerCar, Rental, Reservation, Van, input_date, input_start_and_end_date, search_rental
-from classes import search_unpaid_rental, search_reservation, clear_terminal
+from classes import Car, PassengerCar, Rental, Reservation, Van
+from classes import input_date, input_start_and_end_date, search_rental
+from classes import search_unpaid_rental, search_reservation
 from classes import search_car
-from modelio import query_to_database
+from modelio import query_to_database, clear_terminal
 
 
 def print_logo():
@@ -24,7 +25,8 @@ def print_line(number):
 
 def cancel_uncollected_reservation():
     """Cancels uncollected reservations"""
-    query = 'UPDATE reservations SET status="anulowana" WHERE "{}">startdate AND status="aktywna"'
+    query = 'UPDATE reservations SET status="anulowana" '\
+            'WHERE "{}">startdate AND status="aktywna"'
     query = query.format(datetime.date.today())
     query_to_database(query)
 
@@ -100,7 +102,8 @@ def add_reservation():
 def manipulate_reservation():
     """Calls function to edit and cancel reservation"""
     date = datetime.date.today()
-    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(date), True, date)
+    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '
+                      .format(date), True, date)
     reservation = search_reservation(date)
     if reservation is None:
         return
@@ -153,7 +156,8 @@ def auto_menu():
             return
         elif answer == 3:
             clear_terminal()
-            startdate, enddate = input_start_and_end_date('Data początkowa: ', 'Data końcowa: ')
+            startdate, enddate = input_start_and_end_date('Data początkowa: ',
+                                                          'Data końcowa: ')
             dates_parameteres = {'startdate': startdate, 'enddate': enddate}
             search_car(dates_parameteres)
             return
@@ -168,7 +172,8 @@ def reservation_menu():
     """Prints reservation menu"""
     clear_terminal()
     print('MENU - REZERWACJE')
-    print('1. Nowa rezerwacja\n2. Wyświetlenie, edycja, anulowanie rezerwacji\n9. Powrót')
+    print('1. Nowa rezerwacja')
+    print('2. Wyświetlenie, edycja, anulowanie rezerwacji\n9. Powrót')
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')
@@ -188,7 +193,8 @@ def reservation_menu():
 def collection_reservation():
     """Calls functions to collect reservation"""
     date = datetime.date.today()
-    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '.format(date), True, date)
+    date = input_date('Na jaki dzień wyświetlić rezerwacje? [{}]: '
+                      .format(date), True, date)
     correct_value = False
     reservation = None
     while not correct_value:
@@ -230,8 +236,10 @@ def return_auto():
 def rental_menu():
     """Prints rental menu"""
     clear_terminal()
-    print('MENU - REZERWACJE\n1. Odbiór rezerwacji\n2. Wypożyczenie aktualnie dostępnego pojazdu')
-    print('3. Wypożyczenia z przekroczonym czasem opłacenia\n4. Zwrot samochodu\n9. Powrót')
+    print('MENU - REZERWACJE\n1. Odbiór rezerwacji')
+    print('2. Wypożyczenie aktualnie dostępnego pojazdu')
+    print('3. Wypożyczenia z przekroczonym czasem opłacenia')
+    print('4. Zwrot samochodu\n9. Powrót')
     correct_value = False
     while not correct_value:
         answer = input('Wybór: ')
