@@ -1697,8 +1697,8 @@ class Rental:
         self.set_surname(surname)
         correct_dates = False
         while not correct_dates:
-            self._startdate,
-            self._enddate = input_start_and_end_date('Data początkowa: ',
+            self._startdate, self._enddate = input_start_and_end_date(
+                                                     'Data początkowa: ',
                                                      'Data końcowa: ')
             correct_value = False
             while not correct_value:
@@ -1713,7 +1713,7 @@ class Rental:
                     print('Niepoprawna wartość, spróbuj ponownie')
             if self._paidtodate > self._enddate:
                 print('Nie można opłacić więcej dni niż czas trwania \
-                       rezerwacji, spróbuj ponownie')
+                       wypożyczenia, spróbuj ponownie')
             else:
                 correct_dates = True
         date_parameters = {'startdate': self._startdate,
