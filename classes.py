@@ -1672,6 +1672,13 @@ class Rental:
                       'wypożyczenia, spróbuj ponownie')
             else:
                 correct_dates = True
+        params = {'res_id': reservation.db_id(), 'startdate': self._startdate,
+                  'enddate': self._enddate}
+        list_of_free_cars = get_list_of_id_free_cars(params)
+        if reservation.auto_id() not in list_of_free_cars:
+            print('Wybrany samochód jest danym terminie zajęty, proszę '
+                  'najpierw zmienić dane rezerwacji\nWciśnij enter')
+            input()
         self._auto = reservation.auto()
         self._auto_id = reservation.auto_id()
         reservation.collect()
