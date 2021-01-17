@@ -487,7 +487,6 @@ def insert_side_door_value(self, text_input, empty, changed_values=None):
         try:
             self.set_side_door(side_door)
             correct_value = True
-            correct_value['side_door'] = self._side_door
         except WrongSideDoorTypeError:
             print('Wprowadzona wartość musi być liczbą 0 lub 1,'
                   ' spróbuj ponownie')
@@ -1081,8 +1080,8 @@ class Van(Car):
         """Lets user to input attributes values of car"""
         super().insert_values()
         input_capacity_value(self, 'Pojemność: ', False)
-        insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, \
-                                      1=Tak: ', False)
+        insert_side_door_value(self, 'Czy posiada boczne drzwi? 0=Nie, '
+                                     '1=Tak: ', False)
 
     def generate_insert_query(self):
         """Generates INSERT query to database and returns it"""
