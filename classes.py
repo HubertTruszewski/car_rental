@@ -1650,8 +1650,8 @@ class Rental:
         while not correct_dates:
             startdate = reservation.startdate()
             enddate = reservation.enddate()
-            self._startdate,
-            self._enddate = input_start_and_end_date('Data początkowa [{}]: '
+            self._startdate, self._enddate = input_start_and_end_date(
+                                                     'Data początkowa [{}]: '
                                                      .format(startdate),
                                                      'Data końcowa [{}]: '
                                                      .format(enddate), True,
@@ -1668,8 +1668,8 @@ class Rental:
                 else:
                     print('Niepoprawna wartość, spróbuj ponownie')
             if self._paidtodate > self._enddate:
-                print('Nie można opłacić więcej dni niż czas trwania \
-                      wypożyczenia, spróbuj ponownie')
+                print('Nie można opłacić więcej dni niż czas trwania '
+                      'wypożyczenia, spróbuj ponownie')
             else:
                 correct_dates = True
         self._auto = reservation.auto()
