@@ -1342,7 +1342,7 @@ class Reservation:
         changed_auto = False
         if changed_date and self._auto_id not in list_of_id_free_cars:
             print("Wybrany samochód jest już zajęty w wybranym terminie.")
-            print(" Wybierz inny: (Wciśnij enter)")
+            print("Wybierz inny: (Wciśnij enter)")
             input()
             auto = search_car(reservation_parameters)
             if auto is None:

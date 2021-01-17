@@ -236,7 +236,7 @@ def return_auto():
 def rental_menu():
     """Prints rental menu"""
     clear_terminal()
-    print('MENU - REZERWACJE\n1. Odbiór rezerwacji')
+    print('MENU - WYPOŻYCZENIA\n1. Odbiór rezerwacji')
     print('2. Wypożyczenie aktualnie dostępnego pojazdu')
     print('3. Wypożyczenia z przekroczonym czasem opłacenia')
     print('4. Zwrot samochodu\n9. Powrót')
