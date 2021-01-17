@@ -123,8 +123,11 @@ def get_list_of_cars(parameters, reservation_param):
         query = query.format(**reservation_param)
     else:
         query = 'SELECT * FROM cars as c'
-    if len(parameters):
+    if len(parameters) and not len(reservation_param):
         query += ' WHERE'
+    if len(parameters) and len(reservation_param):
+        query += ' AND'
+    if len(parameters):
         for key, _, value in parameters:
             if type(value) is str:
                 query += ' c.{}="{}" AND'.format(key, value)
