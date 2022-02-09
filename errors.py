@@ -54,9 +54,5 @@ class WrongSideDoorValueError(ValueError):
     pass
 
 
-class WrongConfigFileFormatError(ValueError):
-    pass
-
-
 class WrongDateType(TypeError):
     pass

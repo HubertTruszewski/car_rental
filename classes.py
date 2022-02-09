@@ -1108,10 +1108,10 @@ class Reservation:
     :type surname: str
 
     :param startdate: first day of reservation
-    :type startdate: datetime.date
+    :type startdate: str
 
     :param enddate: last day of reservation
-    :type enddate: datetime.date
+    :type enddate: str
 
     :param auto_id: db_id of reserved car
     :type auto_id: int
@@ -1215,13 +1215,13 @@ class Reservation:
 
     def set_startdate(self, startdate):
         """Lets to set startdate of reservation"""
-        if type(startdate) is not datetime.date:
+        if type(startdate) is not str:
             raise WrongDateType(startdate)
         self._startdate = startdate
 
     def set_enddate(self, enddate):
         """Lets to set enddate of reservation"""
-        if type(enddate) is not datetime.date:
+        if type(enddate) is not str:
             raise WrongDateType(enddate)
         self._enddate = enddate
 
@@ -1418,16 +1418,16 @@ class Rental:
     :type surname: str
 
     :param startdate: first day of rental
-    :type startdate: datetime.date
+    :type startdate: str
 
     :param enddate: last day of rental
-    :type enddate: datetime.date
+    :type enddate: str
 
     :param paidtodate: last paid day of rental
-    :type paidtodate: datetime.date
+    :type paidtodate: str
 
     :param returndate: day of return car
-    :type returndate: datetime.date
+    :type returndate: str
 
     :param auto_id: db_id of reserved car
     :type auto_id: int
@@ -1546,25 +1546,25 @@ class Rental:
 
     def set_startdate(self, startdate):
         """Lets to set a startdate of rental"""
-        if type(startdate) is not datetime.date:
+        if type(startdate) is not str:
             raise WrongDateType(startdate)
         self._startdate = startdate
 
     def set_enddate(self, enddate):
         """Lets to set a enddate of rental"""
-        if type(enddate) is not datetime.date:
+        if type(enddate) is not str:
             raise WrongDateType(enddate)
         self._enddate = enddate
 
     def set_paidtodate(self, paidtodate):
         """Lets to set a paidtodate of rental"""
-        if type(paidtodate) is not datetime.date:
+        if type(paidtodate) is not str:
             raise WrongDateType(paidtodate)
         self._paidtodate = paidtodate
 
     def set_returndate(self, returndate):
         """Lets to set a returndate of rental"""
-        if type(returndate) is not datetime.date:
+        if type(returndate) is not str:
             raise WrongDateType(returndate)
         self._returndate = returndate
 
@@ -1663,10 +1663,11 @@ class Rental:
                     paiddays -= 1
                     correct_value = True
                     date_delta = datetime.timedelta(days=paiddays)
-                    self._paidtodate = self._startdate + date_delta
+                    _conv_date = datetime.date.fromisoformat(self._startdate)
+                    self._paidtodate = _conv_date + date_delta
                 else:
                     print('Niepoprawna wartość, spróbuj ponownie')
-            if self._paidtodate > self._enddate:
+            if self._paidtodate > datetime.date.fromisoformat(self._enddate):
                 print('Nie można opłacić więcej dni niż czas trwania '
                       'wypożyczenia, spróbuj ponownie')
             else:

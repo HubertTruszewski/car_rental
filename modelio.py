@@ -1,78 +1,10 @@
 import os
-from errors import WrongConfigFileFormatError
-import mysql.connector
-import json
+import sqlite3
 
 
 def clear_terminal():
     """Clears the terminal with proper command"""
     os.system('cls' if os.name == 'nt' else 'clear')
-
-
-def setup_config_file():
-    """Create config file if not exist or is incorrect"""
-    config = dict()
-    host = input('Adres serwera: ')
-    username = input('Nazwa użytkownika: ')
-    password = input('Hasło: ')
-    database = input('Nazwa bazy danych: ')
-    config['host'] = host
-    config['username'] = username
-    config['password'] = password
-    config['database'] = database
-    file = open('config.txt', 'w')
-    json.dump(config, file, indent=4)
-    file.close()
-    return config
-
-
-try:
-    file = open('config.txt', 'r')
-    config = json.load(file)
-    file.close()
-    if len(config) != 4:
-        raise WrongConfigFileFormatError
-except FileNotFoundError:
-    clear_terminal()
-    print('Nie znaleziono pliku konfiguracyjnego.')
-    print('Utworzyć teraz? 0=Nie, 1=Tak')
-    correct_answer = False
-    while not correct_answer:
-        answer = input('Wybór: ')
-        if answer == '0':
-            print('Program nie może działać bez konfiguracji i \
-                  zakończy działanie.')
-            print('Wciśnij enter')
-            input()
-            exit()
-        elif answer == '1':
-            config = setup_config_file()
-            correct_answer = True
-        else:
-            print('Niepoprawny wybór, spróbuj ponownie')
-except WrongConfigFileFormatError:
-    clear_terminal()
-    print('Nieprawidłowy format pliku konfiguracyjnego.')
-    print('Utworzyć nowy? 0=Nie, 1=Tak')
-    correct_answer = False
-    while not correct_answer:
-        answer = input('Wybór: ')
-        if answer == '0':
-            print('Program nie może działać bez konfiguracji '
-                  'i zakończy działanie.')
-            print('Wciśnij enter')
-            input()
-            exit()
-        elif answer == '1':
-            config = setup_config_file()
-            correct_answer = True
-        else:
-            print('Niepoprawny wybór, spróbuj ponownie')
-except Exception as e:
-    print('Problem z dostępem do konfiguracji! Szczegóły: '+str(e))
-    print('Program zakończy działanie\nWciśnij enter')
-    input()
-    exit()
 
 
 def my_db_cursor():
@@ -81,9 +13,9 @@ def my_db_cursor():
     my_db = None
     my_cursor = None
     try:
-        my_db = mysql.connector.connect(**config)
+        my_db = sqlite3.connect('database.db')
         my_cursor = my_db.cursor()
-    except mysql.connector.Error as e:
+    except sqlite3.Error as e:
         print('Błąd połączenia z bazą danych! Szczegóły: ' + str(e))
         print('nProgram zakończy działanie\nWciśnij enter')
         input()
@@ -96,6 +28,7 @@ def query_to_database(query):
     my_db, my_cursor = my_db_cursor()
     my_cursor.execute(query)
     my_db.commit()
+    my_db.close()
 
 
 def get_list_of_cars(parameters, reservation_param):
@@ -136,6 +69,7 @@ def get_list_of_cars(parameters, reservation_param):
         query = query[:-4]
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
+    my_db.close()
     return myresult
 
 
@@ -147,6 +81,7 @@ def get_list_of_reservations(data):
             'FROM reservations as r WHERE r.startdate="{}"'.format(data)
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
+    my_db.close()
     return myresult
 
 
@@ -156,6 +91,7 @@ def get_list_of_rentals():
     query = 'SELECT * FROM rentals WHERE status="wypożyczony"'
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
+    my_db.close()
     return myresult
 
 
@@ -165,6 +101,7 @@ def get_car_by_id(id):
     query = 'SELECT * FROM cars WHERE db_id={}'.format(id)
     my_cursor.execute(query)
     myresult = my_cursor.fetchall()
+    my_db.close()
     return myresult
 
 
@@ -192,6 +129,7 @@ def get_list_of_id_free_cars(reservation_param):
     my_cursor.execute(query)
     results = my_cursor.fetchall()
     list_of_id = [int(id[0]) for id in results]
+    my_db.close()
     return list_of_id
 
 
@@ -203,4 +141,5 @@ def get_list_not_paid_rentals(date):
             'AND status="wypożyczony"'
     my_cursor.execute(query)
     results = my_cursor.fetchall()
+    my_db.close()
     return results
